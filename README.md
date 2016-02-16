@@ -1,2 +1,2 @@
 # qlearn
-A browser demonstration of q-learning
+A browser demonstration of q-learning and SARSA
