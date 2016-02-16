@@ -7,10 +7,18 @@
 
 <body style="text-align:center">
 <canvas id="q_canvas" width="192px" height="192px" style="border:1px solid black"></canvas><br>
-<button id="q_rewind">&lt;&lt;</button>
-<button id="q_backstep">&lt;</button>
 <button id="q_play">Play</button>
 <button id="q_forwardstep">&gt;</button>
+<p>
+Exploration Impulsiveness (decimal %) <input id="q_epsilon" type="text" value="0.1"><br>
+Learning Rate (decimal %) <input id="q_alpha" type="text" value="0.1"><br>
+Discount Rate (decimal %) <input id="q_gamma" type="text" value="0.9"><br>
+<input id="q_action_prob_check" type="checkbox">Action probability based on Q
+
+</p>
+
+
+
 
 <img src="up_arrow.png" style="display:none;">
 <img src="down_arrow.png" style="display:none;">
@@ -24,10 +32,12 @@ var game;
 window.onload = function()
 {
    game = new QLearn({main_canvas: document.getElementById("q_canvas"),
-                      rewind_button: document.getElementById("q_rewind"),
-                      backstep_button: document.getElementById("q_backstep"),
                       play_button: document.getElementById("q_play"),
-                      forward_button: document.getElementById("q_forwardstep")
+                      forward_button: document.getElementById("q_forwardstep"),
+                      epsilon_text: document.getElementById("q_epsilon"),
+                      alpha_text: document.getElementById("q_alpha"),
+                      gamma_text: document.getElementById("q_gamma"),
+                      action_prob_checkbox: document.getElementById("q_action_prob_check")
                      });
 };
 

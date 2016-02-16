@@ -21,10 +21,12 @@
 var QLearn = function(html_elements)
 {
     this.displayCanvas      = html_elements.main_canvas;
-    this.rewind_button      = html_elements.rewind_button;
-    this.backstep_button    = html_elements.backstep_button;
     this.play_button        = html_elements.play_button;
     this.forward_button     = html_elements.forward_button;
+    this.epsilon_text       = html_elements.epsilon_text;
+    this.alpha_text         = html_elements.alpha_text;
+    this.gamma_text         = html_elements.gamma_text;
+    this.action_prob_checkbox = html_elements.action_prob_checkbox;
 
     this.displayContext;
     this.width = this.displayCanvas.width;
@@ -42,11 +44,13 @@ var QLearn = function(html_elements)
     this.q_values = [];
 
     this.exploration_rate = 0.1;    // eta
-    this.learning_rate = 0.1;       // alpha
+    this.learning_rate = 0.3;       // alpha
     this.discount_factor = 0.9;     // gamma
 
     this.experience = [];
     this.experience_idx = 0;
+
+    this.animate_interval_hdl = 0;
 
     // Images
     this.up_arrow_img = loadImage("up_arrow.png", null);
@@ -61,10 +65,15 @@ var QLearn = function(html_elements)
 
         this.displayContext = this.displayCanvas.getContext("2d");
 
-        this.rewind_button.onclick      = this.handle_rewind_press.bind(this);
-        this.backstep_button.onclick    = this.handle_backstep_press.bind(this);
         this.play_button.onclick        = this.handle_play_press.bind(this);
         this.forward_button.onclick     = this.handle_forward_press.bind(this);
+        this.epsilon_text.oninput       = this.handle_epsilon_text_change.bind(this);
+        this.alpha_text.oninput         = this.handle_alpha_text_change.bind(this);
+        this.gamma_text.oninput         = this.handle_gamma_text_change.bind(this);
+
+        this.handle_epsilon_text_change();
+        this.handle_alpha_text_change();
+        this.handle_gamma_text_change();
 
         for (idx=0; idx < this.rewards[0].length; idx++)
         {
@@ -80,17 +89,7 @@ var QLearn = function(html_elements)
                 }
             }
         }
-        console.log(this.q_values);
-    };
-
-    this.handle_rewind_press = function()
-    {
-        console.log("Rewind");
-    };
-
-    this.handle_backstep_press = function()
-    {
-        console.log("Backstep");
+        this.render();
     };
 
     this.handle_play_press = function()
@@ -98,19 +97,65 @@ var QLearn = function(html_elements)
         if (this.play_button.innerHTML == "Play")
         {
             this.play_button.innerHTML = "Pause";
+            this.animate_interval_hdl = setInterval(this.animate.bind(this), 100);
         }
         else
         {
-            this.play_button.innerHTML = "Play";
+            this.pause_animation();
         }
     };
 
     this.handle_forward_press = function()
     {
-        console.log("Forward");
+        this.pause_animation();
 
         this.evaluate_new_action()
 
+        this.render();
+    };
+
+    this.handle_epsilon_text_change = function()
+    {
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(this.epsilon_text.value))
+        {
+            this.exploration_rate = parseFloat(this.epsilon_text.value);
+        }
+    };
+
+    this.handle_alpha_text_change = function()
+    {
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(this.alpha_text.value))
+        {
+            this.learning_rate = parseFloat(this.alpha_text.value);
+        }
+    };
+
+    this.handle_gamma_text_change = function()
+    {
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(this.gamma_text.value))
+        {
+            this.discount_factor = parseFloat(this.gamma_text.value);
+        }
+    };
+
+    this.pause_animation = function()
+    {
+        if (this.play_button.innerHTML == "Pause")
+        {
+            this.play_button.innerHTML = "Play";
+            clearInterval(this.animate_interval_hdl);
+        }
+    };
+
+    this.animate = function()
+    {
+        this.evaluate_new_action();
         this.render();
     };
 
@@ -127,7 +172,37 @@ var QLearn = function(html_elements)
         // Randomly explore
         if (Math.random() < this.exploration_rate)
         {
-            action_dir = (Math.random() * 4)|0;
+            if (this.action_prob_checkbox.checked)
+            {
+                var mean = this.q_values[old_state[0]][old_state[1]].reduce(function(previousValue, currentValue){
+                    return currentValue + previousValue;
+                }) / 4;
+
+                var exp_list = [];
+                var exp_total = 0;
+                var action_prob = Math.random()
+                var prob_total = 0;
+
+                for (idz = 0; idz < 4; idz++)
+                {
+                    exp_list[idz] = Math.exp((this.q_values[old_state[0]][old_state[1]][idz]-mean)/Math.abs(mean));
+                    exp_total += exp_list[idz];
+                }
+
+                for (idz = 0; idz < 4; idz++)
+                {
+                    prob_total += (exp_list[idz] / exp_total);
+                    if (action_prob < prob_total)
+                    {
+                        action_dir = idz;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                action_dir = (Math.random() * 4)|0;
+            }
         }
         else // Exploit
         {
@@ -167,7 +242,7 @@ var QLearn = function(html_elements)
             (new_state[1] >= this.rewards.length))
         {
             new_state = this.agent_location;
-            reward = -1;
+            reward = -10;
         }
         else
         {
@@ -188,14 +263,6 @@ var QLearn = function(html_elements)
         else
         {
             this.agent_location = new_state;
-        }
-    };
-
-    this.pause_animation = function()
-    {
-        if (this.play_button.innerHTML == "Pause")
-        {
-            this.play_button.innerHTML = "Play";
         }
     };
 
@@ -222,9 +289,9 @@ var QLearn = function(html_elements)
                     }
                 }
 
-                color_value = (max_q + 128) | 0;
+                color_value = (max_q + 150) | 0;
 
-                this.displayContext.fillStyle = "rgb(255," + color_value + "," + color_value + ")";
+                this.displayContext.fillStyle = "rgb(" + color_value + "," + color_value + "," + color_value + ")";
                 this.displayContext.fillRect(idx * 32,
                                              idy * 32,
                                              32, 32);
