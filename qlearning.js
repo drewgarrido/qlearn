@@ -23,6 +23,10 @@ var QLearn = function(html_elements)
     this.displayCanvas      = html_elements.main_canvas;
     this.play_button        = html_elements.play_button;
     this.forward_button     = html_elements.forward_button;
+    this.map_open_img       = html_elements.map_open_img;
+    this.map_wall_img       = html_elements.map_wall_img;
+    this.map_goal_img       = html_elements.map_goal_img;
+    this.map_water_img      = html_elements.map_water_img;
     this.epsilon_text       = html_elements.epsilon_text;
     this.alpha_text         = html_elements.alpha_text;
     this.gamma_text         = html_elements.gamma_text;
@@ -56,12 +60,14 @@ var QLearn = function(html_elements)
 
     this.rewards = {0:0,    // Nothing (vacuum?)
                     1:-1,   // Open space
-                    2:-100, // Wall
+                    2:-10,  // Wall
                     3:100,  // Goal point
-                    4:3,    // Cookie
-                    5:-3,   // Spikes
+                    4:5,    // Cookie
+                    5:-5,   // Water puddle
                     6:0     // last item
                     };
+
+    this.map_tile_selection = 1;
 
 
     this.q_values = [];
@@ -97,6 +103,10 @@ var QLearn = function(html_elements)
 
         this.play_button.onclick        = this.handle_play_press.bind(this);
         this.forward_button.onclick     = this.handle_forward_press.bind(this);
+        this.map_open_img.onclick       = this.handle_map_open_img_click.bind(this);
+        this.map_wall_img.onclick       = this.handle_map_wall_img_click.bind(this);
+        this.map_goal_img.onclick       = this.handle_map_goal_img_click.bind(this);
+        this.map_water_img.onclick      = this.handle_map_water_img_click.bind(this);
         this.epsilon_text.oninput       = this.handle_epsilon_text_change.bind(this);
         this.alpha_text.oninput         = this.handle_alpha_text_change.bind(this);
         this.gamma_text.oninput         = this.handle_gamma_text_change.bind(this);
@@ -104,11 +114,13 @@ var QLearn = function(html_elements)
         this.memory_discount_text.oninput = this.handle_memory_discount_text_change.bind(this);
 
         document.onkeypress             = this.handle_keys.bind(this);
+        this.displayCanvas.onmousedown  = this.checkMouseDown.bind(this);
 
         this.handle_epsilon_text_change();
         this.handle_alpha_text_change();
         this.handle_gamma_text_change();
         this.handle_memory_text_change();
+        this.handle_map_open_img_click();
 
         for (idx=0; idx < this.map[0].length; idx++)
         {
@@ -126,6 +138,10 @@ var QLearn = function(html_elements)
         }
         this.render();
     };
+
+    /**************************************************************************
+     * EVENT HANDLERS
+     *************************************************************************/
 
     this.handle_play_press = function()
     {
@@ -147,6 +163,30 @@ var QLearn = function(html_elements)
         this.execute_one_step();
 
         this.render();
+    };
+
+    this.handle_map_open_img_click = function()
+    {
+        this.map_tile_selection = 1;
+        this.show_map_tile_selection(this.map_tile_selection);
+    };
+
+    this.handle_map_wall_img_click = function()
+    {
+        this.map_tile_selection = 2;
+        this.show_map_tile_selection(this.map_tile_selection);
+    };
+
+    this.handle_map_goal_img_click = function()
+    {
+        this.map_tile_selection = 3;
+        this.show_map_tile_selection(this.map_tile_selection);
+    };
+
+    this.handle_map_water_img_click = function()
+    {
+        this.map_tile_selection = 5;
+        this.show_map_tile_selection(this.map_tile_selection);
     };
 
     this.handle_epsilon_text_change = function()
@@ -220,7 +260,45 @@ var QLearn = function(html_elements)
         }
 
         this.render();
-    }
+    };
+
+    this.checkMouseDown = function(e)
+    {
+        e = e || window.event;
+
+        this.map[(e.offsetY / 32)|0][(e.offsetX / 32)|0] = this.map_tile_selection;
+        this.render();
+    };
+
+    /**************************************************************************
+     * HANDLER HELPERS
+     *************************************************************************/
+    this.show_map_tile_selection = function(selection)
+    {
+        var selection_dispatch = {
+                                    1:this.map_open_img,
+                                    2:this.map_wall_img,
+                                    3:this.map_goal_img,
+                                    5:this.map_water_img,
+                                 };
+
+        for(var prop in selection_dispatch)
+        {
+            if(selection_dispatch.hasOwnProperty(prop))
+            {
+                selection_dispatch[prop].style.borderColor = "#000";
+            }
+        }
+
+        if (selection_dispatch[selection] !== undefined)
+        {
+            selection_dispatch[selection].style.borderColor = "#00F";
+        }
+    };
+
+    /**************************************************************************
+     * Automated Q_learning
+     *************************************************************************/
 
     this.pause_animation = function()
     {
@@ -333,22 +411,17 @@ var QLearn = function(html_elements)
         if ((new_state[0] < 0) ||
             (new_state[0] >= this.map[0].length) ||
             (new_state[1] < 0) ||
-            (new_state[1] >= this.map.length))
+            (new_state[1] >= this.map.length) ||
+            (this.map[new_state[1]][new_state[0]] == 2)) // New state is a wall
         {
-            new_state = this.agent_location;
+            new_state = this.agent_location.slice();
             reward = -10;
         }
         else
         {
+            this.agent_location = new_state.slice();
             reward = this.rewards[this.map[new_state[1]][new_state[0]]];
         }
-
-        if (reward == -100)
-        {
-            new_state = this.agent_location.slice();
-        }
-
-        this.agent_location = new_state.slice();
 
         if (this.dreamwalk_check.checked)
         {
@@ -377,7 +450,7 @@ var QLearn = function(html_elements)
                 this.learning_rate * (reward + this.discount_factor * max_q_prime);
         }
 
-        if (reward == 100)
+        if (this.map[new_state[1]][new_state[0]] == 3)  // New state is a goal
         {
             this.agent_location = this.start_location;
 
@@ -413,56 +486,73 @@ var QLearn = function(html_elements)
 
         this.displayContext.clearRect(0,0,this.width, this.height);
 
-        // q values
-        for (idx = 0; idx < this.map[0].length; idx++)
-        {
-            for (idy = 0; idy < this.map.length; idy++)
-            {
-                max_q = this.q_values[idx][idy][0];
-                max_idx = 0;
-
-                for (idz = 1; idz < 4; idz++)
-                {
-                    if (this.q_values[idx][idy][idz] > max_q)
-                    {
-                        max_q = this.q_values[idx][idy][idz];
-                        max_idx = idz;
-                    }
-                }
-
-                color_value = (max_q + 150) | 0;
-
-                this.displayContext.fillStyle = "rgb(" + color_value + "," + color_value + "," + color_value + ")";
-                this.displayContext.fillRect(idx * 32,
-                                             idy * 32,
-                                             32, 32);
-
-                this.displayContext.drawImage(this.arrow_imgs[max_idx],
-                                                idx * 32,
-                                                idy * 32);
-            }
-        }
-
         // Walls and Goal
-        this.displayContext.fillStyle = "rgb(0,0,0)";
-
         for (idx = 0; idx < this.map[0].length; idx++)
         {
             for (idy = 0; idy < this.map.length; idy++)
             {
-                if (this.map[idy][idx] == 2)
+                if (this.map[idy][idx] == 1)    // Open space
                 {
+                    max_q = this.q_values[idx][idy][0];
+                    max_idx = 0;
+
+                    for (idz = 1; idz < 4; idz++)
+                    {
+                        if (this.q_values[idx][idy][idz] > max_q)
+                        {
+                            max_q = this.q_values[idx][idy][idz];
+                            max_idx = idz;
+                        }
+                    }
+
+                    color_value = (max_q + 150) | 0;
+
+                    this.displayContext.fillStyle = "rgb(" + color_value + "," + color_value + "," + color_value + ")";
+                    this.displayContext.fillRect(idx * 32,
+                                                 idy * 32,
+                                                 32, 32);
+
+                    this.displayContext.drawImage(this.arrow_imgs[max_idx],
+                                                    idx * 32,
+                                                    idy * 32);
+                }
+                if (this.map[idy][idx] == 2)        // Wall
+                {
+                    this.displayContext.fillStyle = "rgb(0,0,0)";
                     this.displayContext.fillRect(idx * 32,
                                                  idy * 32,
                                                  32, 32);
                 }
-                else if (this.map[idy][idx] == 3)
+                else if (this.map[idy][idx] == 3)   // Goal point
                 {
+                    this.displayContext.fillStyle = "rgb(255,255,0)";
+                    this.displayContext.fillRect(idx * 32,
+                                                 idy * 32,
+                                                 32, 32);
+
+                }
+                else if (this.map[idy][idx] == 5)   // Water puddle
+                {
+                    max_q = this.q_values[idx][idy][0];
+                    max_idx = 0;
+
+                    for (idz = 1; idz < 4; idz++)
+                    {
+                        if (this.q_values[idx][idy][idz] > max_q)
+                        {
+                            max_q = this.q_values[idx][idy][idz];
+                            max_idx = idz;
+                        }
+                    }
+
                     this.displayContext.fillStyle = "rgb(0,0,255)";
                     this.displayContext.fillRect(idx * 32,
                                                  idy * 32,
                                                  32, 32);
-                    this.displayContext.fillStyle = "rgb(0,0,0)";
+
+                    this.displayContext.drawImage(this.arrow_imgs[max_idx],
+                                                    idx * 32,
+                                                    idy * 32);
                 }
             }
         }
@@ -498,4 +588,6 @@ function loadImage(src, cb)
 
 /*
  * TODO: Click to change map
+ * TODO: Add spikes
+ * TODO: Add one-time cookie
  */
