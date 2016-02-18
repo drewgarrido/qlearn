@@ -26,6 +26,8 @@ var QLearn = function(html_elements)
     this.epsilon_text       = html_elements.epsilon_text;
     this.alpha_text         = html_elements.alpha_text;
     this.gamma_text         = html_elements.gamma_text;
+    this.memory_text        = html_elements.memory_text;
+    this.memory_discount_text = html_elements.memory_discount_text;
     this.action_prob_checkbox = html_elements.action_prob_checkbox;
 
     this.displayContext;
@@ -44,11 +46,12 @@ var QLearn = function(html_elements)
     this.q_values = [];
 
     this.exploration_rate = 0.1;    // eta
-    this.learning_rate = 0.3;       // alpha
+    this.learning_rate = 0.5;       // alpha
     this.discount_factor = 0.9;     // gamma
+    this.memory_size = 0;           // memory size
+    this.memory_discount = 0.75
 
-    this.experience = [];
-    this.experience_idx = 0;
+    this.memory = [];
 
     this.animate_interval_hdl = 0;
 
@@ -70,10 +73,13 @@ var QLearn = function(html_elements)
         this.epsilon_text.oninput       = this.handle_epsilon_text_change.bind(this);
         this.alpha_text.oninput         = this.handle_alpha_text_change.bind(this);
         this.gamma_text.oninput         = this.handle_gamma_text_change.bind(this);
+        this.memory_text.oninput        = this.handle_memory_text_change.bind(this);
+        this.memory_discount_text.oninput = this.handle_memory_discount_text_change.bind(this);
 
         this.handle_epsilon_text_change();
         this.handle_alpha_text_change();
         this.handle_gamma_text_change();
+        this.handle_memory_text_change();
 
         for (idx=0; idx < this.rewards[0].length; idx++)
         {
@@ -97,7 +103,7 @@ var QLearn = function(html_elements)
         if (this.play_button.innerHTML == "Play")
         {
             this.play_button.innerHTML = "Pause";
-            this.animate_interval_hdl = setInterval(this.animate.bind(this), 100);
+            this.animate_interval_hdl = setInterval(this.animate.bind(this), 50);
         }
         else
         {
@@ -144,6 +150,26 @@ var QLearn = function(html_elements)
         }
     };
 
+    this.handle_memory_text_change = function()
+    {
+        var patt = /^([0-9]+)$/;
+
+        if (patt.test(this.memory_text.value))
+        {
+            this.memory_size = parseInt(this.memory_text.value);
+        }
+    };
+
+    this.handle_memory_discount_text_change = function()
+    {
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(this.memory_text.value))
+        {
+            this.memory_discount = parseFloat(this.memory_discount_text.value);
+        }
+    };
+
     this.pause_animation = function()
     {
         if (this.play_button.innerHTML == "Pause")
@@ -168,6 +194,7 @@ var QLearn = function(html_elements)
         var new_state = this.agent_location.slice();
         var max_q_prime, reward;
         var idz;
+        var new_q = 0, old_q;
 
         // Randomly explore
         if (Math.random() < this.exploration_rate)
@@ -256,9 +283,32 @@ var QLearn = function(html_elements)
             this.q_values[old_state[0]][old_state[1]][action_dir] * (1-this.learning_rate) +
             this.learning_rate * (reward + this.discount_factor * max_q_prime);
 
+
+        if (this.memory_size)
+        {
+            this.memory.push({state:old_state, action:action_dir, reward:reward});
+            this.memory = this.memory.slice(-this.memory_size)
+        }
+
         if (reward == 100)
         {
             this.agent_location = this.start_location;
+
+            if (this.memory_size)
+            {
+                for (idz = this.memory.length-1; idz >= 0; idz--)
+                {
+                    new_q = (new_q + this.memory[idz].reward) * this.discount_factor * this.memory_discount;
+                    old_q = this.q_values[this.memory[idz].state[0]][this.memory[idz].state[1]][this.memory[idz].action];
+
+                    if (new_q > old_q)
+                    {
+                        this.q_values[this.memory[idz].state[0]][this.memory[idz].state[1]][this.memory[idz].action] = new_q;
+                    }
+                }
+
+                this.memory = [];
+            }
         }
         else
         {

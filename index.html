@@ -10,9 +10,11 @@
 <button id="q_play">Play</button>
 <button id="q_forwardstep">&gt;</button>
 <p>
-Exploration Impulsiveness (decimal %) <input id="q_epsilon" type="text" value="0.1"><br>
-Learning Rate (decimal %) <input id="q_alpha" type="text" value="0.1"><br>
+Exploration Impulsiveness (decimal %) <input id="q_epsilon" type="text" value="0.3"><br>
+Learning Rate (decimal %) <input id="q_alpha" type="text" value="0.5"><br>
 Discount Rate (decimal %) <input id="q_gamma" type="text" value="0.9"><br>
+Memory Size <input id="q_memory" type="text" value="0"><br>
+Memory Discount Rate <input id="q_memory_discount" type="text" value="0.75"><br>
 <input id="q_action_prob_check" type="checkbox">Action probability based on Q
 
 </p>
@@ -37,6 +39,8 @@ window.onload = function()
                       epsilon_text: document.getElementById("q_epsilon"),
                       alpha_text: document.getElementById("q_alpha"),
                       gamma_text: document.getElementById("q_gamma"),
+                      memory_text: document.getElementById("q_memory"),
+                      memory_discount_text: document.getElementById("q_memory_discount"),
                       action_prob_checkbox: document.getElementById("q_action_prob_check")
                      });
 };
