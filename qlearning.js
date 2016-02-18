@@ -37,17 +37,31 @@ var QLearn = function(html_elements)
 
     this.start_location = [0,0];
     this.agent_location = this.start_location.slice();
-    this.rewards = [[-1, -1,   -100, -1, -1,   -1, -1, -1, -100, 100],
-                     [-1, -1,   -100, -1, -1,   -1, -1, -1, -100, -1],
-                     [-1, -1,   -100, -1, -1,   -1, -1, -1, -100, -1],
-                     [-1, -100, -100, -1, -1,   -1, -1, -1, -100, -1],
-                     [-1, -1,   -1,   -1, -100, -1, -1, -1, -1,   -1],
-                     [-1, -1,   -1,   -1, -100, -1, -1, -1, -1,   -1],
-                     [-1, -1,   -100, -1, -1,   -1, -1, -1, -1,   -1],
-                     [-1, -1,   -100, -1, -1,   -1, -1, -1, -1,   -1],
-                     [-1, -1,   -100, -1, -1,   -1, -1, 100,-1,   -1],
-                     [-1, -1,   -100, -1, -1,   -1, -1, -1, -1,   -1]];
+    this.map    =   [
+                    [1, 1, 1, 1, 2, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                    ];
 
+    this.rewards = {0:0,    // Nothing (vacuum?)
+                    1:-1,   // Open space
+                    2:-100, // Wall
+                    3:100,  // Goal point
+                    4:3,    // Cookie
+                    5:-3,   // Spikes
+                    6:0     // last item
+                    };
 
 
     this.q_values = [];
@@ -96,10 +110,10 @@ var QLearn = function(html_elements)
         this.handle_gamma_text_change();
         this.handle_memory_text_change();
 
-        for (idx=0; idx < this.rewards[0].length; idx++)
+        for (idx=0; idx < this.map[0].length; idx++)
         {
             this.q_values[idx]=[];
-            for (idy = 0; idy < this.rewards.length; idy++)
+            for (idy = 0; idy < this.map.length; idy++)
             {
                 this.q_values[idx][idy] = [];
 
@@ -200,7 +214,7 @@ var QLearn = function(html_elements)
                                  'D':3,
                                  'd':3};
 
-        if (keycode_to_action[keycode])
+        if (keycode_to_action[keycode] !== undefined)
         {
             this.apply_action(keycode_to_action[keycode]);
         }
@@ -317,16 +331,16 @@ var QLearn = function(html_elements)
         }
 
         if ((new_state[0] < 0) ||
-            (new_state[0] >= this.rewards[0].length) ||
+            (new_state[0] >= this.map[0].length) ||
             (new_state[1] < 0) ||
-            (new_state[1] >= this.rewards.length))
+            (new_state[1] >= this.map.length))
         {
             new_state = this.agent_location;
             reward = -10;
         }
         else
         {
-            reward = this.rewards[new_state[1]][new_state[0]];
+            reward = this.rewards[this.map[new_state[1]][new_state[0]]];
         }
 
         if (reward == -100)
@@ -400,9 +414,9 @@ var QLearn = function(html_elements)
         this.displayContext.clearRect(0,0,this.width, this.height);
 
         // q values
-        for (idx = 0; idx < this.rewards[0].length; idx++)
+        for (idx = 0; idx < this.map[0].length; idx++)
         {
-            for (idy = 0; idy < this.rewards.length; idy++)
+            for (idy = 0; idy < this.map.length; idy++)
             {
                 max_q = this.q_values[idx][idy][0];
                 max_idx = 0;
@@ -432,17 +446,17 @@ var QLearn = function(html_elements)
         // Walls and Goal
         this.displayContext.fillStyle = "rgb(0,0,0)";
 
-        for (idx = 0; idx < this.rewards[0].length; idx++)
+        for (idx = 0; idx < this.map[0].length; idx++)
         {
-            for (idy = 0; idy < this.rewards.length; idy++)
+            for (idy = 0; idy < this.map.length; idy++)
             {
-                if (this.rewards[idy][idx] == -100)
+                if (this.map[idy][idx] == 2)
                 {
                     this.displayContext.fillRect(idx * 32,
                                                  idy * 32,
                                                  32, 32);
                 }
-                else if (this.rewards[idy][idx] == 100)
+                else if (this.map[idy][idx] == 3)
                 {
                     this.displayContext.fillStyle = "rgb(0,0,255)";
                     this.displayContext.fillRect(idx * 32,
@@ -482,7 +496,6 @@ function loadImage(src, cb)
 };
 
 
-/* TODO: Arrows/ASDW to control circle
- * TODO: Rewards -> map
+/*
  * TODO: Click to change map
  */
