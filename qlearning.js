@@ -60,6 +60,10 @@ var QLearn = function(html_elements)
     this.down_arrow_img = loadImage("down_arrow.png", null);
     this.left_arrow_img = loadImage("left_arrow.png", null);
     this.right_arrow_img = loadImage("right_arrow.png", null);
+    this.arrow_imgs = [this.up_arrow_img,
+                       this.down_arrow_img,
+                       this.left_arrow_img,
+                       this.right_arrow_img];
 
 
     this.initialize = function()
@@ -346,31 +350,9 @@ var QLearn = function(html_elements)
                                              idy * 32,
                                              32, 32);
 
-                if (max_idx == 0)
-                {
-                    this.displayContext.drawImage(this.up_arrow_img,
-                                                    idx * 32,
-                                                    idy * 32);
-                }
-                else if (max_idx == 1)
-                {
-                    this.displayContext.drawImage(this.down_arrow_img,
-                                                    idx * 32,
-                                                    idy * 32);
-                }
-                else if (max_idx == 2)
-                {
-                    this.displayContext.drawImage(this.left_arrow_img,
-                                                    idx * 32,
-                                                    idy * 32);
-                }
-                else if (max_idx == 3)
-                {
-                    this.displayContext.drawImage(this.right_arrow_img,
-                                                    idx * 32,
-                                                    idy * 32);
-                }
-
+                this.displayContext.drawImage(this.arrow_imgs[max_idx],
+                                                idx * 32,
+                                                idy * 32);
             }
         }
 
@@ -407,8 +389,6 @@ var QLearn = function(html_elements)
         this.displayContext.closePath();
         this.displayContext.fill();
     };
-
-
 
 
     this.initialize();
