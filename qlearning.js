@@ -33,7 +33,7 @@ var QLearn = function(html_elements)
     this.memory_text        = html_elements.memory_text;
     this.memory_discount_text = html_elements.memory_discount_text;
     this.action_prob_checkbox = html_elements.action_prob_checkbox;
-    this.dreamwalk_check    = html_elements.dreamwalk_check;
+    this.dreamwalk_text     = html_elements.dreamwalk_text;
 
     this.displayContext;
     this.width = this.displayCanvas.width;
@@ -81,6 +81,7 @@ var QLearn = function(html_elements)
     this.memory = [];
 
     this.dreamwalk_memory = [];
+    this.dreamwalk_memory_size = 0;
 
     this.animate_interval_hdl = 0;
 
@@ -112,6 +113,7 @@ var QLearn = function(html_elements)
         this.gamma_text.oninput         = this.handle_gamma_text_change.bind(this);
         this.memory_text.oninput        = this.handle_memory_text_change.bind(this);
         this.memory_discount_text.oninput = this.handle_memory_discount_text_change.bind(this);
+        this.dreamwalk_text.oninput     = this.handle_dreamwalk_text_change.bind(this);
 
         document.onkeypress             = this.handle_keys.bind(this);
         this.displayCanvas.onmousedown  = this.checkMouseDown.bind(this);
@@ -236,6 +238,16 @@ var QLearn = function(html_elements)
         if (patt.test(this.memory_text.value))
         {
             this.memory_discount = parseFloat(this.memory_discount_text.value);
+        }
+    };
+
+    this.handle_dreamwalk_text_change = function()
+    {
+        var patt = /^([0-9]+)$/;
+
+        if (patt.test(this.dreamwalk_text.value))
+        {
+            this.dreamwalk_memory_size = parseInt(this.dreamwalk_text.value);
         }
     };
 
@@ -423,12 +435,15 @@ var QLearn = function(html_elements)
             reward = this.rewards[this.map[new_state[1]][new_state[0]]];
         }
 
-        if (this.dreamwalk_check.checked)
+        if (this.dreamwalk_memory_size)
         {
             this.dreamwalk_memory.push({old_state:old_state,
                                         action:action_dir,
                                         reward:reward,
                                         new_state:new_state});
+
+            this.dreamwalk_memory.slice(this.dreamwalk_memory_size);
+
             var random_idx = (this.dreamwalk_memory.length * Math.random())|0;
             var sample = this.dreamwalk_memory[random_idx];
 
@@ -587,7 +602,5 @@ function loadImage(src, cb)
 
 
 /*
- * TODO: Click to change map
- * TODO: Add spikes
  * TODO: Add one-time cookie
  */

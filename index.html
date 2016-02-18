@@ -15,9 +15,6 @@ Use the "WASD" keys to direct the agent (green circle) manually.<br>
 <img id="q_goal_img" src="goal.png" style="border:3px solid black">
 <img id="q_water_img" src="water.png" style="border:3px solid black">
 
-<div style="width:200px;margin:auto;">
-
-</div>
 <p>
 <h2>Effective Parameters</h2>
 Exploration Impulsiveness (decimal %) <input id="q_epsilon" type="text" value="0.3"><br>
@@ -25,10 +22,9 @@ Learning Rate (decimal %) <input id="q_alpha" type="text" value="0.5"><br>
 Discount Rate (decimal %) <input id="q_gamma" type="text" value="0.95"><br>
 Memory Size <input id="q_memory" type="text" value="0"><br>
 Memory Discount Rate <input id="q_memory_discount" type="text" value="0.2"><br>
+Dreamwalking Memory <input id="q_dreamwalk_text" type="text" value="0"><br>
 <h2>Ineffective Parameters</h2>
 Action probability based on Q <input id="q_action_prob_check" type="checkbox"><br>
-Dreamwalking <input id="q_dreamwalk_check" type="checkbox">
-
 </p>
 
 
@@ -57,8 +53,8 @@ window.onload = function()
                       gamma_text: document.getElementById("q_gamma"),
                       memory_text: document.getElementById("q_memory"),
                       memory_discount_text: document.getElementById("q_memory_discount"),
+                      dreamwalk_text: document.getElementById("q_dreamwalk_text"),
                       action_prob_checkbox: document.getElementById("q_action_prob_check"),
-                      dreamwalk_check: document.getElementById("q_dreamwalk_check")
                      });
 };
 
