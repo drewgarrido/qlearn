@@ -280,6 +280,11 @@ var QLearn = function(html_elements)
             reward = this.rewards[new_state[1]][new_state[0]];
         }
 
+        if (reward == -100)
+        {
+            new_state = this.agent_location;
+        }
+
         max_q_prime = Math.max.apply(Math, this.q_values[new_state[0]][new_state[1]]);
 
         // Q(s,a) = Q(s,a)*(1-a) + a*(R + y*max(Q(s')))
