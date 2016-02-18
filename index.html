@@ -6,16 +6,19 @@
 </head>
 
 <body style="text-align:center">
-<canvas id="q_canvas" width="192px" height="192px" style="border:1px solid black"></canvas><br>
+<canvas id="q_canvas" width="320px" height="320px" style="border:1px solid black"></canvas><br>
 <button id="q_play">Play</button>
 <button id="q_forwardstep">&gt;</button>
 <p>
+<h2>Effective Parameters</h2>
 Exploration Impulsiveness (decimal %) <input id="q_epsilon" type="text" value="0.3"><br>
 Learning Rate (decimal %) <input id="q_alpha" type="text" value="0.5"><br>
-Discount Rate (decimal %) <input id="q_gamma" type="text" value="0.9"><br>
+Discount Rate (decimal %) <input id="q_gamma" type="text" value="0.95"><br>
 Memory Size <input id="q_memory" type="text" value="0"><br>
-Memory Discount Rate <input id="q_memory_discount" type="text" value="0.75"><br>
-<input id="q_action_prob_check" type="checkbox">Action probability based on Q
+Memory Discount Rate <input id="q_memory_discount" type="text" value="0.2"><br>
+<h2>Ineffective Parameters</h2>
+Action probability based on Q <input id="q_action_prob_check" type="checkbox"><br>
+Dreamwalking <input id="q_dreamwalk_check" type="checkbox">
 
 </p>
 
@@ -41,7 +44,8 @@ window.onload = function()
                       gamma_text: document.getElementById("q_gamma"),
                       memory_text: document.getElementById("q_memory"),
                       memory_discount_text: document.getElementById("q_memory_discount"),
-                      action_prob_checkbox: document.getElementById("q_action_prob_check")
+                      action_prob_checkbox: document.getElementById("q_action_prob_check"),
+                      dreamwalk_check: document.getElementById("q_dreamwalk_check")
                      });
 };
 

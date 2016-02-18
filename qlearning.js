@@ -29,6 +29,7 @@ var QLearn = function(html_elements)
     this.memory_text        = html_elements.memory_text;
     this.memory_discount_text = html_elements.memory_discount_text;
     this.action_prob_checkbox = html_elements.action_prob_checkbox;
+    this.dreamwalk_check    = html_elements.dreamwalk_check;
 
     this.displayContext;
     this.width = this.displayCanvas.width;
@@ -36,12 +37,18 @@ var QLearn = function(html_elements)
 
     this.start_location = [0,0];
     this.agent_location = this.start_location.slice();
-    this.rewards = [[-1, -1, -1, -1, -100, 100],
-                    [-1, -1, -1, -1, -100, -1],
-                    [-1, -1, -1, -1, -100, -1],
-                    [-1, -1, -1, -1, -100, -1],
-                    [-1, -1, -1, -1, -1,   -1],
-                    [-1, -1, -1, -1, -1,   -1]];
+    this.rewards = [[-1, -1,   -100, -1, -1,   -1, -1, -1, -100, 100],
+                     [-1, -1,   -100, -1, -1,   -1, -1, -1, -100, -1],
+                     [-1, -1,   -100, -1, -1,   -1, -1, -1, -100, -1],
+                     [-1, -100, -100, -1, -1,   -1, -1, -1, -100, -1],
+                     [-1, -1,   -1,   -1, -100, -1, -1, -1, -1,   -1],
+                     [-1, -1,   -1,   -1, -100, -1, -1, -1, -1,   -1],
+                     [-1, -1,   -100, -1, -1,   -1, -1, -1, -1,   -1],
+                     [-1, -1,   -100, -1, -1,   -1, -1, -1, -1,   -1],
+                     [-1, -1,   -100, -1, -1,   -1, -1, 100,-1,   -1],
+                     [-1, -1,   -100, -1, -1,   -1, -1, -1, -1,   -1]];
+
+
 
     this.q_values = [];
 
@@ -52,6 +59,8 @@ var QLearn = function(html_elements)
     this.memory_discount = 0.75
 
     this.memory = [];
+
+    this.dreamwalk_memory = [];
 
     this.animate_interval_hdl = 0;
 
@@ -79,6 +88,8 @@ var QLearn = function(html_elements)
         this.gamma_text.oninput         = this.handle_gamma_text_change.bind(this);
         this.memory_text.oninput        = this.handle_memory_text_change.bind(this);
         this.memory_discount_text.oninput = this.handle_memory_discount_text_change.bind(this);
+
+        document.onkeypress             = this.handle_keys.bind(this);
 
         this.handle_epsilon_text_change();
         this.handle_alpha_text_change();
@@ -119,7 +130,7 @@ var QLearn = function(html_elements)
     {
         this.pause_animation();
 
-        this.evaluate_new_action()
+        this.execute_one_step();
 
         this.render();
     };
@@ -174,6 +185,29 @@ var QLearn = function(html_elements)
         }
     };
 
+    this.handle_keys = function(e)
+    {
+        e = e || window.event;
+        var keycode = e.which || e.keyCode;
+        keycode = String.fromCharCode(keycode);
+
+        var keycode_to_action = {'W':0,
+                                 'w':0,
+                                 'S':1,
+                                 's':1,
+                                 'A':2,
+                                 'a':2,
+                                 'D':3,
+                                 'd':3};
+
+        if (keycode_to_action[keycode])
+        {
+            this.apply_action(keycode_to_action[keycode]);
+        }
+
+        this.render();
+    }
+
     this.pause_animation = function()
     {
         if (this.play_button.innerHTML == "Pause")
@@ -185,20 +219,22 @@ var QLearn = function(html_elements)
 
     this.animate = function()
     {
-        this.evaluate_new_action();
+        this.execute_one_step();
         this.render();
     };
 
-    this.evaluate_new_action = function()
+    this.execute_one_step = function()
+    {
+        this.apply_action(this.choose_action());
+    };
+
+    this.choose_action = function()
     {
         var max_q;
         // Pick an action vector
         var action_dir = 0;
         var old_state = this.agent_location.slice();
-        var new_state = this.agent_location.slice();
-        var max_q_prime, reward;
         var idz;
-        var new_q = 0, old_q;
 
         // Randomly explore
         if (Math.random() < this.exploration_rate)
@@ -250,6 +286,19 @@ var QLearn = function(html_elements)
             }
         }
 
+        return action_dir;
+    };
+
+    this.apply_action = function(action_dir)
+    {
+        var max_q;
+        // Pick an action vector
+        var old_state = this.agent_location.slice();
+        var new_state = this.agent_location.slice();
+        var max_q_prime, reward;
+        var idz;
+        var new_q = 0, old_q;
+
         if (action_dir == 0) // Up
         {
             new_state[1] -= 1;
@@ -282,21 +331,36 @@ var QLearn = function(html_elements)
 
         if (reward == -100)
         {
-            new_state = this.agent_location;
+            new_state = this.agent_location.slice();
         }
 
-        max_q_prime = Math.max.apply(Math, this.q_values[new_state[0]][new_state[1]]);
+        this.agent_location = new_state.slice();
 
-        // Q(s,a) = Q(s,a)*(1-a) + a*(R + y*max(Q(s')))
-        this.q_values[old_state[0]][old_state[1]][action_dir] =
-            this.q_values[old_state[0]][old_state[1]][action_dir] * (1-this.learning_rate) +
-            this.learning_rate * (reward + this.discount_factor * max_q_prime);
-
-
-        if (this.memory_size)
+        if (this.dreamwalk_check.checked)
         {
-            this.memory.push({state:old_state, action:action_dir, reward:reward});
-            this.memory = this.memory.slice(-this.memory_size)
+            this.dreamwalk_memory.push({old_state:old_state,
+                                        action:action_dir,
+                                        reward:reward,
+                                        new_state:new_state});
+            var random_idx = (this.dreamwalk_memory.length * Math.random())|0;
+            var sample = this.dreamwalk_memory[random_idx];
+
+            max_q_prime = Math.max.apply(Math, this.q_values[sample.new_state[0]][sample.new_state[1]]);
+
+            // Q(s,a) = Q(s,a)*(1-a) + a*(R + y*max(Q(s')))
+            this.q_values[sample.old_state[0]][sample.old_state[1]][sample.action] =
+                this.q_values[sample.old_state[0]][sample.old_state[1]][sample.action] * (1-this.learning_rate) +
+                this.learning_rate * (sample.reward + this.discount_factor * max_q_prime);
+
+        }
+        else
+        {
+            max_q_prime = Math.max.apply(Math, this.q_values[new_state[0]][new_state[1]]);
+
+            // Q(s,a) = Q(s,a)*(1-a) + a*(R + y*max(Q(s')))
+            this.q_values[old_state[0]][old_state[1]][action_dir] =
+                this.q_values[old_state[0]][old_state[1]][action_dir] * (1-this.learning_rate) +
+                this.learning_rate * (reward + this.discount_factor * max_q_prime);
         }
 
         if (reward == 100)
@@ -305,9 +369,11 @@ var QLearn = function(html_elements)
 
             if (this.memory_size)
             {
+                new_q = reward * this.memory_discount;
+
                 for (idz = this.memory.length-1; idz >= 0; idz--)
                 {
-                    new_q = (new_q + this.memory[idz].reward) * this.discount_factor * this.memory_discount;
+                    new_q = (new_q) * this.discount_factor + this.memory[idz].reward;
                     old_q = this.q_values[this.memory[idz].state[0]][this.memory[idz].state[1]][this.memory[idz].action];
 
                     if (new_q > old_q)
@@ -319,9 +385,11 @@ var QLearn = function(html_elements)
                 this.memory = [];
             }
         }
-        else
+
+        if (this.memory_size)
         {
-            this.agent_location = new_state;
+            this.memory.push({state:old_state, action:action_dir, reward:reward});
+            this.memory = this.memory.slice(-this.memory_size)
         }
     };
 
@@ -412,3 +480,9 @@ function loadImage(src, cb)
     }
     return img1;
 };
+
+
+/* TODO: Arrows/ASDW to control circle
+ * TODO: Rewards -> map
+ * TODO: Click to change map
+ */
