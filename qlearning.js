@@ -27,6 +27,7 @@ var QLearn = function(html_elements)
     this.map_wall_img       = html_elements.map_wall_img;
     this.map_goal_img       = html_elements.map_goal_img;
     this.map_water_img      = html_elements.map_water_img;
+    this.map_cookie_img     = html_elements.map_cookie_img;
     this.epsilon_text       = html_elements.epsilon_text;
     this.alpha_text         = html_elements.alpha_text;
     this.gamma_text         = html_elements.gamma_text;
@@ -39,31 +40,29 @@ var QLearn = function(html_elements)
     this.width = this.displayCanvas.width;
     this.height = this.displayCanvas.height;
 
-    this.start_location = [6,4];
+    this.start_location = [5,3];
     this.agent_location = this.start_location.slice();
     this.map    =   [
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 3, 2, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 3, 2, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                     ];
 
     this.rewards = {0:0,    // Nothing (vacuum?)
                     1:-1,   // Open space
                     2:-10,  // Wall
                     3:100,  // Goal point
-                    4:5,    // Cookie
-                    5:-5,   // Water puddle
+                    4:10,    // Cookie
+                    5:-10,   // Water puddle
                     6:0     // last item
                     };
 
@@ -76,7 +75,7 @@ var QLearn = function(html_elements)
     this.learning_rate = 0.5;       // alpha
     this.discount_factor = 0.9;     // gamma
     this.memory_size = 0;           // memory size
-    this.memory_discount = 0.75
+    this.memory_discount = 0.75;
 
     this.memory = [];
 
@@ -84,6 +83,9 @@ var QLearn = function(html_elements)
     this.dreamwalk_memory_size = 0;
 
     this.animate_interval_hdl = 0;
+
+    this.start_cookie_list = [];
+    this.current_cookie_list = [];
 
     // Images
     this.up_arrow_img = loadImage("up_arrow.png", null);
@@ -108,6 +110,7 @@ var QLearn = function(html_elements)
         this.map_wall_img.onclick       = this.handle_map_wall_img_click.bind(this);
         this.map_goal_img.onclick       = this.handle_map_goal_img_click.bind(this);
         this.map_water_img.onclick      = this.handle_map_water_img_click.bind(this);
+        this.map_cookie_img.onclick     = this.handle_map_cookie_img_click.bind(this);
         this.epsilon_text.oninput       = this.handle_epsilon_text_change.bind(this);
         this.alpha_text.oninput         = this.handle_alpha_text_change.bind(this);
         this.gamma_text.oninput         = this.handle_gamma_text_change.bind(this);
@@ -134,7 +137,7 @@ var QLearn = function(html_elements)
                 // 4 actions from each state/node
                 for (idz = 0; idz < 4; idz++)
                 {
-                    this.q_values[idx][idy][idz] = 0;
+                    this.q_values[idx][idy][idz] = Math.random() * 0.01;
                 }
             }
         }
@@ -182,6 +185,12 @@ var QLearn = function(html_elements)
     this.handle_map_goal_img_click = function()
     {
         this.map_tile_selection = 3;
+        this.show_map_tile_selection(this.map_tile_selection);
+    };
+
+    this.handle_map_cookie_img_click = function()
+    {
+        this.map_tile_selection = 4;
         this.show_map_tile_selection(this.map_tile_selection);
     };
 
@@ -276,9 +285,45 @@ var QLearn = function(html_elements)
 
     this.checkMouseDown = function(e)
     {
+        var idx, idy, idz;
+        var cookie_removed = false;
         e = e || window.event;
 
-        this.map[(e.offsetY / 32)|0][(e.offsetX / 32)|0] = this.map_tile_selection;
+        idx = (e.offsetX / 32)|0;
+        idy = (e.offsetY / 32)|0;
+
+        // First, remove any cookies
+        for (idz = 0; idz < this.start_cookie_list.length; idz++)
+        {
+            if (this.start_cookie_list[idz][0] == idx && this.start_cookie_list[idz][1] == idy)
+            {
+                this.start_cookie_list.splice(idz, 1);
+                cookie_removed = true;
+            }
+        }
+
+        for (idz = 0; idz < this.current_cookie_list.length; idz++)
+        {
+            if (this.current_cookie_list[idz][0] == idx && this.current_cookie_list[idz][1] == idy)
+            {
+                this.current_cookie_list.splice(idz, 1);
+            }
+        }
+
+        // Place/remove cookie
+        if (this.map_tile_selection == 4 && !cookie_removed && this.map[idy][idx] == 1)
+        {
+            this.start_cookie_list.push([idx,idy]);
+            this.current_cookie_list.push([idx,idy]);
+        }
+        else if (cookie_removed)
+        {
+            this.map[idy][idx] = 1;
+        }
+        else
+        {
+            this.map[idy][idx] = this.map_tile_selection;
+        }
         this.render();
     };
 
@@ -291,6 +336,7 @@ var QLearn = function(html_elements)
                                     1:this.map_open_img,
                                     2:this.map_wall_img,
                                     3:this.map_goal_img,
+                                    4:this.map_cookie_img,
                                     5:this.map_water_img,
                                  };
 
@@ -435,6 +481,17 @@ var QLearn = function(html_elements)
             reward = this.rewards[this.map[new_state[1]][new_state[0]]];
         }
 
+        for (idz=0; idz < this.current_cookie_list.length; idz++)
+        {
+            if (new_state[0] == this.current_cookie_list[idz][0] &&
+                new_state[1] == this.current_cookie_list[idz][1])
+            {
+                this.current_cookie_list.splice(idz, 1);
+                reward += this.rewards[4];
+                break;
+            }
+        }
+
         if (this.dreamwalk_memory_size)
         {
             this.dreamwalk_memory.push({old_state:old_state,
@@ -468,6 +525,8 @@ var QLearn = function(html_elements)
         if (this.map[new_state[1]][new_state[0]] == 3)  // New state is a goal
         {
             this.agent_location = this.start_location;
+
+            this.current_cookie_list = this.start_cookie_list.slice();
 
             if (this.memory_size)
             {
@@ -572,8 +631,16 @@ var QLearn = function(html_elements)
             }
         }
 
+        // Cookies
+        for (idz = 0; idz < this.current_cookie_list.length; idz++)
+        {
+            this.displayContext.drawImage(this.map_cookie_img,
+                                        this.current_cookie_list[idz][0] * 32,
+                                        this.current_cookie_list[idz][1] * 32);
+        }
+
         // Agent
-        this.displayContext.fillStyle = "rgb(0,192,0)";
+        this.displayContext.fillStyle = "rgb(96,255,0)";
         this.displayContext.beginPath();
         this.displayContext.arc(this.agent_location[0] * 32 + 16,
                                 this.agent_location[1] * 32 + 16,

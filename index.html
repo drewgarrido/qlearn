@@ -2,17 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Q-Learning and SARSA</title>
+<title>Q-Learning</title>
 </head>
 
 <body style="text-align:center">
-<canvas id="q_canvas" width="576px" height="448px" style="border:1px solid black"></canvas><br>
+<canvas id="q_canvas" width="512px" height="384px" style="border:1px solid black"></canvas><br>
 Use the "WASD" keys to direct the agent (green circle) manually.<br>
 <button id="q_play">Play</button>
 <button id="q_forwardstep">&gt;</button>
 <img id="q_open_img" src="open.png" style="border:3px solid black">
 <img id="q_wall_img" src="wall.png" style="border:3px solid black">
 <img id="q_goal_img" src="goal.png" style="border:3px solid black">
+<img id="q_cookie_img" src="cookie.png" style="border:3px solid black">
 <img id="q_water_img" src="water.png" style="border:3px solid black">
 
 <p>
@@ -22,7 +23,7 @@ Learning Rate (decimal %) <input id="q_alpha" type="text" value="0.5"><br>
 Discount Rate (decimal %) <input id="q_gamma" type="text" value="0.95"><br>
 Memory Size <input id="q_memory" type="text" value="0"><br>
 Memory Discount Rate <input id="q_memory_discount" type="text" value="0.2"><br>
-Dreamwalking Memory <input id="q_dreamwalk_text" type="text" value="0"><br>
+Stochastic Update Memory (0=Off) <input id="q_dreamwalk_text" type="text" value="0"><br>
 <h2>Ineffective Parameters</h2>
 Action probability based on Q <input id="q_action_prob_check" type="checkbox"><br>
 </p>
@@ -34,6 +35,7 @@ Action probability based on Q <input id="q_action_prob_check" type="checkbox"><b
 <img src="down_arrow.png" style="display:none;">
 <img src="left_arrow.png" style="display:none;">
 <img src="right_arrow.png" style="display:none;">
+<img src="cookie.png" style="display:none;">
 
 <script src="qlearning.js"></script>
 <script>
@@ -48,6 +50,7 @@ window.onload = function()
                       map_wall_img: document.getElementById("q_wall_img"),
                       map_goal_img: document.getElementById("q_goal_img"),
                       map_water_img: document.getElementById("q_water_img"),
+                      map_cookie_img: document.getElementById("q_cookie_img"),
                       epsilon_text: document.getElementById("q_epsilon"),
                       alpha_text: document.getElementById("q_alpha"),
                       gamma_text: document.getElementById("q_gamma"),
