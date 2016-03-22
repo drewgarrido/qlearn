@@ -79,7 +79,7 @@ text-align:right;
     }
 
     #parameters_div {
-        max-width:27em;
+        max-width:512px;
         margin:0 auto;
     }
 }

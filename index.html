@@ -54,14 +54,77 @@ Click the maze area to place the selected map tile.
 </div>
 <h2>Parameters</h2>
 <table>
-<tr><td class="tdlabel">Exploration Impulsiveness (decimal %)</td><td class="tdcontrol"><input class="parameter_text" id="q_epsilon" type="text" value="0.3"></td></tr>
-<tr><td class="tdlabel">Learning Rate (decimal %)</td><td class="tdcontrol"><input class="parameter_text" id="q_alpha" type="text" value="0.5"></td></tr>
-<tr><td class="tdlabel">Discount Rate (decimal %)</td><td class="tdcontrol"><input class="parameter_text" id="q_gamma" type="text" value="0.95"></td></tr>
-<tr><td class="tdlabel">Memory Size</td><td class="tdcontrol"><input class="parameter_text" id="q_memory" type="text" value="0"></td></tr>
-<tr><td class="tdlabel">Memory Discount (decimal %)</td><td class="tdcontrol"><input class="parameter_text" id="q_memory_discount" type="text" value="0.2"></td></tr>
-<tr><td class="tdlabel">Stochastic Update Memory Size (0=Off)</td><td class="tdcontrol"><input class="parameter_text" id="q_dreamwalk_text" type="text" value="0"></td></tr>
+<tr><td class="tdlabel"><a href="#exploration_impulsiveness">Exploration Impulsiveness (decimal %)</a></td><td class="tdcontrol"><input class="parameter_text" id="q_epsilon" type="text" value="0.3"></td></tr>
+<tr><td class="tdlabel"><a href="#learning_rate">Learning Rate (decimal %)</a></td><td class="tdcontrol"><input class="parameter_text" id="q_alpha" type="text" value="0.5"></td></tr>
+<tr><td class="tdlabel"><a href="#discount_rate">Discount Rate (decimal %)</a></td><td class="tdcontrol"><input class="parameter_text" id="q_gamma" type="text" value="0.95"></td></tr>
+<tr><td class="tdlabel"><a href="#memory">Memory Size</a></td><td class="tdcontrol"><input class="parameter_text" id="q_memory" type="text" value="0"></td></tr>
+<tr><td class="tdlabel"><a href="#memory">Memory Discount (decimal %)</a></td><td class="tdcontrol"><input class="parameter_text" id="q_memory_discount" type="text" value="0.2"></td></tr>
+<tr><td class="tdlabel"><a href="#stochastic">Stochastic Update Memory Size (0=Off)</a></td><td class="tdcontrol"><input class="parameter_text" id="q_dreamwalk_text" type="text" value="0"></td></tr>
 </table>
 </div>
+</div>
+<div style="max-width:512px;margin:0 auto;padding-top:1em;clear:both;">
+<h2>Explanations</h2>
+<h3>Q-Learning</h3>
+<p>
+In Q-Learning, a computer agent (the green circle in the lab) is trying to
+maximize his reward. The lab offers several rewards, with the most important
+being the goal. Like a lab rat, the agent is being enticed to the end of the
+maze. The agent is then reset to the starting point, but with the knowledge
+she gained.
+</p><p>
+The x-y position of the agent is her <b>state</b>. The agent can always take
+one of 4 <b>actions</b>: move up, down, left, or right. After each action, the
+computer agent updates her "expected reward", or <b>q-value</b>, for taking
+that action from that state. The next time the agent encounters this state,
+she will probably choose the action with the highest q-value.
+</p>
+<p>
+The q-value is updated using the following equation.<br>
+<img src="q_equation.png">
+</p>
+<p>
+In this lab, the Q(s,a) function is a 3D matrix, where each x-y position has a
+value for each action (matrix size 16 x 12 x 4). After the agent takes an
+action, she observes the <b>reward</b> (or penalty) for taking that action AND
+observes the best q-value of the new state. The q-value of the old state is
+then updated.
+</p><p>
+The <b>learning rate</b>, often denoted by &alpha;, controls how much a
+q-value changes each repetition. With a high learning rate, any changes to the
+environment will cause the agent to be confused less by allowing the q-values
+to change quickly to the new conditions. However, in a changing environment
+where not all the variables in a state are captured, a low learning rate may
+be advantageous by retaining the best action for the most probable conditions
+in that state. For instance, a navigating robot may not track the wind, and
+if the rare wind knocks it over, the robot should not change its actions for
+occasional variables in the state it does not know about.
+</p><p>
+The <b>discount factor</b>, often denoted by &gamma;, controls how much a
+q-value changes according to future rewards, as opposed to immediate rewards.
+A factor of 1 prefers future rewards, whereas a factor of 0 prefers immediate
+rewards. If a far away goal with high reward and a close goal with a low
+reward are on the map, the agent will prefer one of the goals according to
+this factor.
+</p><p>
+The agent occasionally chooses to do a random action, instead of following the
+one with the highest q-value, in order to explore. In papers, this probability
+of exploration is often assigned &epsilon;. Here, it is called <b>exploration
+impulsiveness</b>.
+</p>
+
+
+
+
+<h3 id="exploration_impulsiveness">Exploration Impulsiveness</h3>
+<h3 id="learning_rate">Learning Rate</h3>
+<h3 id="discount_rate">Discount Rate</h3>
+<h3 id="memory">Memory</h3>
+<h4>Memory Size</h4>
+<h4>Memory Discount</h4>
+<h3 id="stochastic">Stochastic Update Memory</h3>
+
+
 </div>
 
 
