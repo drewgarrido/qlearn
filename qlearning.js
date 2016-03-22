@@ -33,6 +33,7 @@ var QLearn = function(html_elements)
 
     this.map_open_text      = html_elements.map_open_text;
     this.map_grass_text     = html_elements.map_grass_text;
+    this.map_wall_text      = html_elements.map_wall_text;
     this.map_goal_text      = html_elements.map_goal_text;
     this.map_water_text     = html_elements.map_water_text;
     this.map_cookie_text    = html_elements.map_cookie_text;
@@ -133,6 +134,7 @@ var QLearn = function(html_elements)
 
         this.map_open_text.oninput       = this.handle_map_open_text_change.bind(this);
         this.map_grass_text.oninput      = this.handle_map_grass_text_change.bind(this);
+        this.map_wall_text.oninput       = this.handle_map_wall_text_change.bind(this);
         this.map_goal_text.oninput       = this.handle_map_goal_text_change.bind(this);
         this.map_water_text.oninput      = this.handle_map_water_text_change.bind(this);
         this.map_cookie_text.oninput     = this.handle_map_cookie_text_change.bind(this);
@@ -155,6 +157,7 @@ var QLearn = function(html_elements)
 
         this.handle_map_open_text_change();
         this.handle_map_grass_text_change();
+        this.handle_map_wall_text_change();
         this.handle_map_goal_text_change();
         this.handle_map_water_text_change();
         this.handle_map_cookie_text_change();
@@ -255,6 +258,16 @@ var QLearn = function(html_elements)
         if (patt.test(this.map_grass_text.value))
         {
             this.rewards[this.GRASS] = parseFloat(this.map_grass_text.value);
+        }
+    };
+
+    this.handle_map_wall_text_change = function()
+    {
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(this.map_wall_text.value))
+        {
+            this.rewards[this.WALL] = parseFloat(this.map_wall_text.value);
         }
     };
 
@@ -753,7 +766,6 @@ function loadImage(src, cb)
 
 
 /*
- * TODO: Re-add reward for hitting wall
  * TODO: Diminishing returns
  * TODO: Learning rate annealing
  */
