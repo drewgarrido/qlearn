@@ -153,6 +153,12 @@ var QLearn = function(html_elements)
         this.handle_memory_text_change();
         this.handle_map_open_img_click();
 
+        this.handle_map_open_text_change();
+        this.handle_map_grass_text_change();
+        this.handle_map_goal_text_change();
+        this.handle_map_water_text_change();
+        this.handle_map_cookie_text_change();
+        this.goal_list = [[10,3,this.rewards[this.GOAL]]];
         for (idx=0; idx < this.map[0].length; idx++)
         {
             this.q_values[idx]=[];
@@ -526,7 +532,7 @@ var QLearn = function(html_elements)
             (this.map[new_state[1]][new_state[0]] == this.WALL))
         {
             new_state = this.agent_location.slice();
-            reward = -10;
+            reward = this.rewards[this.WALL];
         }
         else
         {
@@ -747,6 +753,7 @@ function loadImage(src, cb)
 
 
 /*
- * TODO: Changable rewards
+ * TODO: Re-add reward for hitting wall
+ * TODO: Diminishing returns
  * TODO: Learning rate annealing
  */
