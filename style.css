@@ -4,6 +4,12 @@ font-family: sans-serif;
 line-height: 1.5em;
 }
 
+.play_pause_step {
+width:5em;
+height:2em;
+font-size:1em;
+}
+
 .figure {
 text-align:center;
 margin:2em auto;
@@ -12,11 +18,12 @@ font-weight:bold;
 
 .map_tiles {
 margin:0 0.4em;
+border:5px solid black;
 }
 
 .q_rewards {
 padding:0.3em;
-width:28px;
+width:32px;
 text-align:center;
 }
 
@@ -39,9 +46,9 @@ text-align:right;
 .tdcontrol {
 }
 
-@media screen and (min-width:1050px) {
+@media screen and (min-width:1000px) {
     #column_div {
-        max-width:1050px;
+        max-width:1000px;
         margin:0 auto;
     }
 
@@ -53,13 +60,13 @@ text-align:right;
     }
 
     #parameters_div {
-        max-width:25em;
+        max-width:27em;
         float:left;
-        margin-left:4em;
+        margin-left:3em;
     }
 }
 
-@media not screen and (min-width:1050px) {
+@media not screen and (min-width:1000px) {
     #column_div {
         max-width:512px;
         margin:0 auto;
@@ -72,7 +79,7 @@ text-align:right;
     }
 
     #parameters_div {
-        max-width:25em;
+        max-width:27em;
         margin:0 auto;
     }
 }

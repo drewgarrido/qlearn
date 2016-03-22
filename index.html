@@ -12,19 +12,21 @@
 <h1>Q-Learning Laboratory</h1>
 
 <canvas id="q_canvas" width="512px" height="384px" style="border:1px solid black"></canvas><br>
+<button class="play_pause_step" id="q_play">Play</button>
+<button class="play_pause_step" id="q_forwardstep">Step</button>
+<p style="text-align:left;"><b>Controls</b><br>
 Use the "WASD" keys to direct the agent (green circle) manually.<br>
-<b>Watch the agent learn</b><br>
-<button id="q_play">Play</button>
-<button id="q_forwardstep">&gt;</button><br>
-Refresh the page to reset the agent
+Refresh (F5) the page to reset the agent and map.<br>
+Click the maze area to place the selected map tile.
+</p>
 </div>
 
 <div id="parameters_div">
-<h2>Parameters</h2>
-<div style="text-align:center;">
-<b>Use the mouse to modify the environment</b><br>
-<table style="margin:0 auto;">
+<div style="line-height:1.2;margin-bottom:3em;">
+<h2>Map Tiles</h2>
+<table style="margin:0 auto;text-align:center;">
 <tr style="line-height:1em;">
+<td></td>
 <td>Open</td>
 <td>Grass</td>
 <td>Wall</td>
@@ -33,13 +35,15 @@ Refresh the page to reset the agent
 <td>Water</td>
 </tr>
 <tr style="line-height:0;">
-<td><img class="map_tiles" id="q_open_img" src="open.png" style="border:3px solid black"></td>
-<td><img class="map_tiles" id="q_grass_img" src="grass.png" style="border:3px solid black"></td>
-<td><img class="map_tiles" id="q_wall_img" src="wall.png" style="border:3px solid black"></td>
-<td><img class="map_tiles" id="q_goal_img" src="goal.png" style="border:3px solid black"></td>
-<td><img class="map_tiles" id="q_cookie_img" src="cookie.png" style="border:3px solid black"></td>
-<td><img class="map_tiles" id="q_water_img" src="water.png" style="border:3px solid black"></td>
+<td></td>
+<td><img class="map_tiles" id="q_open_img" src="open.png"></td>
+<td><img class="map_tiles" id="q_grass_img" src="grass.png"></td>
+<td><img class="map_tiles" id="q_wall_img" src="wall.png"></td>
+<td><img class="map_tiles" id="q_goal_img" src="goal.png"></td>
+<td><img class="map_tiles" id="q_cookie_img" src="cookie.png"></td>
+<td><img class="map_tiles" id="q_water_img" src="water.png"></td>
 </tr><tr>
+<td>Reward:</td>
 <td><input class="q_rewards" id="q_open_text"   type="text" value="0"></td>
 <td><input class="q_rewards" id="q_grass_text"  type="text" value="-1"></td>
 <td><input class="q_rewards" id="q_wall_text"   type="text" value="-10"></td>
@@ -48,7 +52,7 @@ Refresh the page to reset the agent
 <td><input class="q_rewards" id="q_water_text"  type="text" value="-10"></td>
 </tr></table>
 </div>
-<br>
+<h2>Parameters</h2>
 <table>
 <tr><td class="tdlabel">Exploration Impulsiveness (decimal %)</td><td class="tdcontrol"><input class="parameter_text" id="q_epsilon" type="text" value="0.3"></td></tr>
 <tr><td class="tdlabel">Learning Rate (decimal %)</td><td class="tdcontrol"><input class="parameter_text" id="q_alpha" type="text" value="0.5"></td></tr>
@@ -58,11 +62,7 @@ Refresh the page to reset the agent
 <tr><td class="tdlabel">Stochastic Update Memory Size (0=Off)</td><td class="tdcontrol"><input class="parameter_text" id="q_dreamwalk_text" type="text" value="0"></td></tr>
 </table>
 </div>
-
 </div>
-
-
-
 
 
 <img src="up_arrow.png" style="display:none;">

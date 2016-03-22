@@ -452,7 +452,7 @@ var QLearn = function(html_elements)
 
         if (selection_dispatch[selection] !== undefined)
         {
-            selection_dispatch[selection].style.borderColor = "#00F";
+            selection_dispatch[selection].style.borderColor = "#F00";
         }
     };
 
@@ -559,7 +559,7 @@ var QLearn = function(html_elements)
                 new_state[1] == this.current_cookie_list[idz][1])
             {
                 this.current_cookie_list.splice(idz, 1);
-                reward += this.rewards[4];
+                reward += this.rewards[this.COOKIE];
                 break;
             }
         }
@@ -618,8 +618,7 @@ var QLearn = function(html_elements)
                 this.memory = [];
             }
         }
-
-        if (this.memory_size)
+        else if (this.memory_size)
         {
             this.memory.push({state:old_state, action:action_dir, reward:reward});
             this.memory = this.memory.slice(-this.memory_size);
