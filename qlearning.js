@@ -23,50 +23,67 @@ var QLearn = function(html_elements)
     this.displayCanvas      = html_elements.main_canvas;
     this.play_button        = html_elements.play_button;
     this.forward_button     = html_elements.forward_button;
+
     this.map_open_img       = html_elements.map_open_img;
+    this.map_grass_img      = html_elements.map_grass_img;
     this.map_wall_img       = html_elements.map_wall_img;
     this.map_goal_img       = html_elements.map_goal_img;
     this.map_water_img      = html_elements.map_water_img;
     this.map_cookie_img     = html_elements.map_cookie_img;
+
+    this.map_open_text      = html_elements.map_open_text;
+    this.map_grass_text     = html_elements.map_grass_text;
+    this.map_goal_text      = html_elements.map_goal_text;
+    this.map_water_text     = html_elements.map_water_text;
+    this.map_cookie_text    = html_elements.map_cookie_text;
+
     this.epsilon_text       = html_elements.epsilon_text;
     this.alpha_text         = html_elements.alpha_text;
     this.gamma_text         = html_elements.gamma_text;
     this.memory_text        = html_elements.memory_text;
     this.memory_discount_text = html_elements.memory_discount_text;
-    this.action_prob_checkbox = html_elements.action_prob_checkbox;
     this.dreamwalk_text     = html_elements.dreamwalk_text;
 
     this.displayContext;
     this.width = this.displayCanvas.width;
     this.height = this.displayCanvas.height;
 
+
+    this.OPEN_SPACE = 0;
+    this.GRASS      = 1;
+    this.WALL       = 2;
+    this.GOAL       = 3;
+    this.COOKIE     = 4;
+    this.WATER      = 5;
+    this.LAST_ITEM  = 6;
+
     this.start_location = [5,3];
     this.agent_location = this.start_location.slice();
     this.map    =   [
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 3, 2, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 3, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
                     ];
 
-    this.rewards = {0:0,    // Nothing (vacuum?)
-                    1:-1,   // Open space
-                    2:-10,  // Wall
-                    3:100,  // Goal point
-                    4:10,    // Cookie
-                    5:-10,   // Water puddle
-                    6:0     // last item
-                    };
+    this.rewards = [];
+    this.rewards[this.OPEN_SPACE] = 0;
+    this.rewards[this.GRASS     ] = -1;
+    this.rewards[this.WALL      ] = -10;
+    this.rewards[this.GOAL      ] = 100;
+    this.rewards[this.COOKIE    ] = 10;
+    this.rewards[this.WATER     ] = -10;
+    this.rewards[this.LAST_ITEM ] = 0;
 
-    this.map_tile_selection = 1;
+    this.map_tile_selection = this.OPEN_SPACE;
 
 
     this.q_values = [];
@@ -106,11 +123,20 @@ var QLearn = function(html_elements)
 
         this.play_button.onclick        = this.handle_play_press.bind(this);
         this.forward_button.onclick     = this.handle_forward_press.bind(this);
+
         this.map_open_img.onclick       = this.handle_map_open_img_click.bind(this);
+        this.map_grass_img.onclick      = this.handle_map_grass_img_click.bind(this);
         this.map_wall_img.onclick       = this.handle_map_wall_img_click.bind(this);
         this.map_goal_img.onclick       = this.handle_map_goal_img_click.bind(this);
         this.map_water_img.onclick      = this.handle_map_water_img_click.bind(this);
         this.map_cookie_img.onclick     = this.handle_map_cookie_img_click.bind(this);
+
+        this.map_open_text.oninput       = this.handle_map_open_text_change.bind(this);
+        this.map_grass_text.oninput      = this.handle_map_grass_text_change.bind(this);
+        this.map_goal_text.oninput       = this.handle_map_goal_text_change.bind(this);
+        this.map_water_text.oninput      = this.handle_map_water_text_change.bind(this);
+        this.map_cookie_text.oninput     = this.handle_map_cookie_text_change.bind(this);
+
         this.epsilon_text.oninput       = this.handle_epsilon_text_change.bind(this);
         this.alpha_text.oninput         = this.handle_alpha_text_change.bind(this);
         this.gamma_text.oninput         = this.handle_gamma_text_change.bind(this);
@@ -172,32 +198,88 @@ var QLearn = function(html_elements)
 
     this.handle_map_open_img_click = function()
     {
-        this.map_tile_selection = 1;
+        this.map_tile_selection = this.OPEN_SPACE;
+        this.show_map_tile_selection(this.map_tile_selection);
+    };
+
+    this.handle_map_grass_img_click = function()
+    {
+        this.map_tile_selection = this.GRASS;
         this.show_map_tile_selection(this.map_tile_selection);
     };
 
     this.handle_map_wall_img_click = function()
     {
-        this.map_tile_selection = 2;
+        this.map_tile_selection = this.WALL;
         this.show_map_tile_selection(this.map_tile_selection);
     };
 
     this.handle_map_goal_img_click = function()
     {
-        this.map_tile_selection = 3;
+        this.map_tile_selection = this.GOAL;
         this.show_map_tile_selection(this.map_tile_selection);
     };
 
     this.handle_map_cookie_img_click = function()
     {
-        this.map_tile_selection = 4;
+        this.map_tile_selection = this.COOKIE;
         this.show_map_tile_selection(this.map_tile_selection);
     };
 
     this.handle_map_water_img_click = function()
     {
-        this.map_tile_selection = 5;
+        this.map_tile_selection = this.WATER;
         this.show_map_tile_selection(this.map_tile_selection);
+    };
+
+    this.handle_map_open_text_change = function()
+    {
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(this.map_open_text.value))
+        {
+            this.rewards[this.OPEN_SPACE] = parseFloat(this.map_open_text.value);
+        }
+    };
+
+    this.handle_map_grass_text_change = function()
+    {
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(this.map_grass_text.value))
+        {
+            this.rewards[this.GRASS] = parseFloat(this.map_grass_text.value);
+        }
+    };
+
+    this.handle_map_goal_text_change = function()
+    {
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(this.map_goal_text.value))
+        {
+            this.rewards[this.GOAL] = parseFloat(this.map_goal_text.value);
+        }
+    };
+
+    this.handle_map_cookie_text_change = function()
+    {
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(this.map_cookie_text.value))
+        {
+            this.rewards[this.COOKIE] = parseFloat(this.map_cookie_text.value);
+        }
+    };
+
+    this.handle_map_water_text_change = function()
+    {
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(this.map_water_text.value))
+        {
+            this.rewards[this.WATER] = parseFloat(this.map_water_text.value);
+        }
     };
 
     this.handle_epsilon_text_change = function()
@@ -236,7 +318,7 @@ var QLearn = function(html_elements)
 
         if (patt.test(this.memory_text.value))
         {
-            this.memory_size = parseInt(this.memory_text.value);
+            this.memory_size = parseInt(this.memory_text.value, 10);
         }
     };
 
@@ -256,7 +338,7 @@ var QLearn = function(html_elements)
 
         if (patt.test(this.dreamwalk_text.value))
         {
-            this.dreamwalk_memory_size = parseInt(this.dreamwalk_text.value);
+            this.dreamwalk_memory_size = parseInt(this.dreamwalk_text.value, 10);
         }
     };
 
@@ -311,14 +393,14 @@ var QLearn = function(html_elements)
         }
 
         // Place/remove cookie
-        if (this.map_tile_selection == 4 && !cookie_removed && this.map[idy][idx] == 1)
+        if (this.map_tile_selection == this.COOKIE && !cookie_removed && this.map[idy][idx] == this.OPEN_SPACE)
         {
             this.start_cookie_list.push([idx,idy]);
             this.current_cookie_list.push([idx,idy]);
         }
         else if (cookie_removed)
         {
-            this.map[idy][idx] = 1;
+            this.map[idy][idx] = this.OPEN_SPACE;
         }
         else
         {
@@ -332,13 +414,14 @@ var QLearn = function(html_elements)
      *************************************************************************/
     this.show_map_tile_selection = function(selection)
     {
-        var selection_dispatch = {
-                                    1:this.map_open_img,
-                                    2:this.map_wall_img,
-                                    3:this.map_goal_img,
-                                    4:this.map_cookie_img,
-                                    5:this.map_water_img,
-                                 };
+        var selection_dispatch = [];
+
+        selection_dispatch[this.OPEN_SPACE] = this.map_open_img;
+        selection_dispatch[this.GRASS     ] = this.map_grass_img;
+        selection_dispatch[this.WALL      ] = this.map_wall_img;
+        selection_dispatch[this.GOAL      ] = this.map_goal_img;
+        selection_dispatch[this.COOKIE    ] = this.map_cookie_img;
+        selection_dispatch[this.WATER     ] = this.map_water_img;
 
         for(var prop in selection_dispatch)
         {
@@ -389,37 +472,7 @@ var QLearn = function(html_elements)
         // Randomly explore
         if (Math.random() < this.exploration_rate)
         {
-            if (this.action_prob_checkbox.checked)
-            {
-                var mean = this.q_values[old_state[0]][old_state[1]].reduce(function(previousValue, currentValue){
-                    return currentValue + previousValue;
-                }) / 4;
-
-                var exp_list = [];
-                var exp_total = 0;
-                var action_prob = Math.random()
-                var prob_total = 0;
-
-                for (idz = 0; idz < 4; idz++)
-                {
-                    exp_list[idz] = Math.exp((this.q_values[old_state[0]][old_state[1]][idz]-mean)/Math.abs(mean));
-                    exp_total += exp_list[idz];
-                }
-
-                for (idz = 0; idz < 4; idz++)
-                {
-                    prob_total += (exp_list[idz] / exp_total);
-                    if (action_prob < prob_total)
-                    {
-                        action_dir = idz;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                action_dir = (Math.random() * 4)|0;
-            }
+            action_dir = (Math.random() * 4)|0;
         }
         else // Exploit
         {
@@ -449,15 +502,15 @@ var QLearn = function(html_elements)
         var idz;
         var new_q = 0, old_q;
 
-        if (action_dir == 0) // Up
+        if (action_dir === 0) // Up
         {
             new_state[1] -= 1;
         }
-        else if (action_dir == 1) // Down
+        else if (action_dir === 1) // Down
         {
             new_state[1] += 1;
         }
-        else if (action_dir == 2) // Left
+        else if (action_dir === 2) // Left
         {
             new_state[0] -= 1;
         }
@@ -470,7 +523,7 @@ var QLearn = function(html_elements)
             (new_state[0] >= this.map[0].length) ||
             (new_state[1] < 0) ||
             (new_state[1] >= this.map.length) ||
-            (this.map[new_state[1]][new_state[0]] == 2)) // New state is a wall
+            (this.map[new_state[1]][new_state[0]] == this.WALL))
         {
             new_state = this.agent_location.slice();
             reward = -10;
@@ -522,7 +575,7 @@ var QLearn = function(html_elements)
                 this.learning_rate * (reward + this.discount_factor * max_q_prime);
         }
 
-        if (this.map[new_state[1]][new_state[0]] == 3)  // New state is a goal
+        if (this.map[new_state[1]][new_state[0]] == this.GOAL)
         {
             this.agent_location = this.start_location;
 
@@ -550,7 +603,7 @@ var QLearn = function(html_elements)
         if (this.memory_size)
         {
             this.memory.push({state:old_state, action:action_dir, reward:reward});
-            this.memory = this.memory.slice(-this.memory_size)
+            this.memory = this.memory.slice(-this.memory_size);
         }
     };
 
@@ -560,12 +613,12 @@ var QLearn = function(html_elements)
 
         this.displayContext.clearRect(0,0,this.width, this.height);
 
-        // Walls and Goal
+        // Environment maze
         for (idx = 0; idx < this.map[0].length; idx++)
         {
             for (idy = 0; idy < this.map.length; idy++)
             {
-                if (this.map[idy][idx] == 1)    // Open space
+                if (this.map[idy][idx] == this.OPEN_SPACE)
                 {
                     max_q = this.q_values[idx][idy][0];
                     max_idx = 0;
@@ -590,14 +643,39 @@ var QLearn = function(html_elements)
                                                     idx * 32,
                                                     idy * 32);
                 }
-                if (this.map[idy][idx] == 2)        // Wall
+                else if (this.map[idy][idx] == this.GRASS)
+                {
+                    max_q = this.q_values[idx][idy][0];
+                    max_idx = 0;
+
+                    for (idz = 1; idz < 4; idz++)
+                    {
+                        if (this.q_values[idx][idy][idz] > max_q)
+                        {
+                            max_q = this.q_values[idx][idy][idz];
+                            max_idx = idz;
+                        }
+                    }
+
+                    color_value = (max_q + 150) | 0;
+
+                    this.displayContext.fillStyle = "rgb(" + color_value + ",255," + color_value + ")";
+                    this.displayContext.fillRect(idx * 32,
+                                                 idy * 32,
+                                                 32, 32);
+
+                    this.displayContext.drawImage(this.arrow_imgs[max_idx],
+                                                    idx * 32,
+                                                    idy * 32);
+                }
+                else if (this.map[idy][idx] == this.WALL)
                 {
                     this.displayContext.fillStyle = "rgb(0,0,0)";
                     this.displayContext.fillRect(idx * 32,
                                                  idy * 32,
                                                  32, 32);
                 }
-                else if (this.map[idy][idx] == 3)   // Goal point
+                else if (this.map[idy][idx] == this.GOAL)
                 {
                     this.displayContext.fillStyle = "rgb(255,255,0)";
                     this.displayContext.fillRect(idx * 32,
@@ -605,7 +683,7 @@ var QLearn = function(html_elements)
                                                  32, 32);
 
                 }
-                else if (this.map[idy][idx] == 5)   // Water puddle
+                else if (this.map[idy][idx] == this.WATER)
                 {
                     max_q = this.q_values[idx][idy][0];
                     max_idx = 0;
@@ -665,9 +743,10 @@ function loadImage(src, cb)
         img1.src = src;
     }
     return img1;
-};
+}
 
 
 /*
- * TODO: Add one-time cookie
+ * TODO: Changable rewards
+ * TODO: Learning rate annealing
  */

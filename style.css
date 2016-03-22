@@ -1,0 +1,78 @@
+
+body {
+font-family: sans-serif;
+line-height: 1.5em;
+}
+
+.figure {
+text-align:center;
+margin:2em auto;
+font-weight:bold;
+}
+
+.map_tiles {
+margin:0 0.4em;
+}
+
+.q_rewards {
+padding:0.3em;
+width:28px;
+text-align:center;
+}
+
+.parameter_text {
+padding:0.3em;
+width:4em;
+}
+
+h2 {
+margin-top: 2em;
+}
+
+.tdlabel {
+width:18em;
+height:2em;
+padding-right:0.5em;
+text-align:right;
+}
+
+.tdcontrol {
+}
+
+@media screen and (min-width:1050px) {
+    #column_div {
+        max-width:1050px;
+        margin:0 auto;
+    }
+
+    #animation_div {
+        max-width:512px;
+        text-align:center;
+        float:left;
+        margin:0;
+    }
+
+    #parameters_div {
+        max-width:25em;
+        float:left;
+        margin-left:4em;
+    }
+}
+
+@media not screen and (min-width:1050px) {
+    #column_div {
+        max-width:512px;
+        margin:0 auto;
+    }
+
+    #animation_div {
+        max-width:512px;
+        text-align:center;
+        margin:0 auto;
+    }
+
+    #parameters_div {
+        max-width:25em;
+        margin:0 auto;
+    }
+}

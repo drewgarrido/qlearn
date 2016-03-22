@@ -3,30 +3,64 @@
 <head>
 <meta charset="utf-8" />
 <title>Q-Learning</title>
+<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
-<body style="text-align:center">
+<body>
+<div id="column_div">
+<div id="animation_div">
+<h1>Q-Learning Laboratory</h1>
+
 <canvas id="q_canvas" width="512px" height="384px" style="border:1px solid black"></canvas><br>
 Use the "WASD" keys to direct the agent (green circle) manually.<br>
+<b>Watch the agent learn</b><br>
 <button id="q_play">Play</button>
-<button id="q_forwardstep">&gt;</button>
-<img id="q_open_img" src="open.png" style="border:3px solid black">
-<img id="q_wall_img" src="wall.png" style="border:3px solid black">
-<img id="q_goal_img" src="goal.png" style="border:3px solid black">
-<img id="q_cookie_img" src="cookie.png" style="border:3px solid black">
-<img id="q_water_img" src="water.png" style="border:3px solid black">
+<button id="q_forwardstep">&gt;</button><br>
+Refresh the page to reset the agent
+</div>
 
-<p>
-<h2>Effective Parameters</h2>
-Exploration Impulsiveness (decimal %) <input id="q_epsilon" type="text" value="0.3"><br>
-Learning Rate (decimal %) <input id="q_alpha" type="text" value="0.5"><br>
-Discount Rate (decimal %) <input id="q_gamma" type="text" value="0.95"><br>
-Memory Size <input id="q_memory" type="text" value="0"><br>
-Memory Discount Rate <input id="q_memory_discount" type="text" value="0.2"><br>
-Stochastic Update Memory (0=Off) <input id="q_dreamwalk_text" type="text" value="0"><br>
-<h2>Ineffective Parameters</h2>
-Action probability based on Q <input id="q_action_prob_check" type="checkbox"><br>
-</p>
+<div id="parameters_div">
+<h2>Parameters</h2>
+<div style="text-align:center;">
+<b>Use the mouse to modify the environment</b><br>
+<table style="margin:0 auto;">
+<tr style="line-height:1em;">
+<td>Open</td>
+<td>Grass</td>
+<td>Wall</td>
+<td>Goal</td>
+<td>Cookie</td>
+<td>Water</td>
+</tr>
+<tr style="line-height:0;">
+<td><img class="map_tiles" id="q_open_img" src="open.png" style="border:3px solid black"></td>
+<td><img class="map_tiles" id="q_grass_img" src="grass.png" style="border:3px solid black"></td>
+<td><img class="map_tiles" id="q_wall_img" src="wall.png" style="border:3px solid black"></td>
+<td><img class="map_tiles" id="q_goal_img" src="goal.png" style="border:3px solid black"></td>
+<td><img class="map_tiles" id="q_cookie_img" src="cookie.png" style="border:3px solid black"></td>
+<td><img class="map_tiles" id="q_water_img" src="water.png" style="border:3px solid black"></td>
+</tr><tr>
+<td><input class="q_rewards" id="q_open_text"   type="text" value="0"></td>
+<td><input class="q_rewards" id="q_grass_text"  type="text" value="-1"></td>
+<td></td>
+<td><input class="q_rewards" id="q_goal_text"   type="text" value="100"></td>
+<td><input class="q_rewards" id="q_cookie_text" type="text" value="10"></td>
+<td><input class="q_rewards" id="q_water_text"  type="text" value="-10"></td>
+</tr></table>
+</div>
+<br>
+<table>
+<tr><td class="tdlabel">Exploration Impulsiveness (decimal %)</td><td class="tdcontrol"><input class="parameter_text" id="q_epsilon" type="text" value="0.3"></td></tr>
+<tr><td class="tdlabel">Learning Rate (decimal %)</td><td class="tdcontrol"><input class="parameter_text" id="q_alpha" type="text" value="0.5"></td></tr>
+<tr><td class="tdlabel">Discount Rate (decimal %)</td><td class="tdcontrol"><input class="parameter_text" id="q_gamma" type="text" value="0.95"></td></tr>
+<tr><td class="tdlabel">Memory Size</td><td class="tdcontrol"><input class="parameter_text" id="q_memory" type="text" value="0"></td></tr>
+<tr><td class="tdlabel">Memory Discount Rate</td><td class="tdcontrol"><input class="parameter_text" id="q_memory_discount" type="text" value="0.2"></td></tr>
+<tr><td class="tdlabel">Stochastic Update Memory (0=Off)</td><td class="tdcontrol"><input class="parameter_text" id="q_dreamwalk_text" type="text" value="0"></td></tr>
+</table>
+</div>
+
+</div>
+
 
 
 
@@ -46,18 +80,26 @@ window.onload = function()
    game = new QLearn({main_canvas: document.getElementById("q_canvas"),
                       play_button: document.getElementById("q_play"),
                       forward_button: document.getElementById("q_forwardstep"),
+
                       map_open_img: document.getElementById("q_open_img"),
+                      map_grass_img: document.getElementById("q_grass_img"),
                       map_wall_img: document.getElementById("q_wall_img"),
                       map_goal_img: document.getElementById("q_goal_img"),
                       map_water_img: document.getElementById("q_water_img"),
                       map_cookie_img: document.getElementById("q_cookie_img"),
+
+                      map_open_text: document.getElementById("q_open_text"),
+                      map_grass_text: document.getElementById("q_grass_text"),
+                      map_goal_text: document.getElementById("q_goal_text"),
+                      map_water_text: document.getElementById("q_water_text"),
+                      map_cookie_text: document.getElementById("q_cookie_text"),
+
                       epsilon_text: document.getElementById("q_epsilon"),
                       alpha_text: document.getElementById("q_alpha"),
                       gamma_text: document.getElementById("q_gamma"),
                       memory_text: document.getElementById("q_memory"),
                       memory_discount_text: document.getElementById("q_memory_discount"),
                       dreamwalk_text: document.getElementById("q_dreamwalk_text"),
-                      action_prob_checkbox: document.getElementById("q_action_prob_check"),
                      });
 };
 
