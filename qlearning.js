@@ -765,6 +765,8 @@ function loadImage(src, cb)
 
 
 /*
+ * TODO: Parameters get slider bars
+ * TODO: Indicate and change starting location
  * TODO: Diminishing returns
  * TODO: Learning rate annealing
  */
