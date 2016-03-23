@@ -23,16 +23,16 @@ Click the maze area to place the selected map tile.
 
 <div id="parameters_div">
 <div style="line-height:1.2;margin-bottom:3em;">
-<h2>Map Tiles</h2>
+<h2><a href="#map_tiles_explanation">Map Tiles</a></h2>
 <table style="margin:0 auto;text-align:center;">
 <tr style="line-height:1em;">
 <td></td>
-<td>Open</td>
-<td>Grass</td>
-<td>Wall</td>
-<td>Goal</td>
-<td>Cookie</td>
-<td>Water</td>
+<td><a href="#open_tile">Open</a></td>
+<td><a href="#grass_tile">Grass</a></td>
+<td><a href="#wall_tile">Wall</a></td>
+<td><a href="#goal_tile">Goal</a></td>
+<td><a href="#cookie_tile">Cookie</a></td>
+<td><a href="#water_tile">Water</a></td>
 </tr>
 <tr style="line-height:0;">
 <td></td>
@@ -67,63 +67,240 @@ Click the maze area to place the selected map tile.
 <h2>Explanations</h2>
 <h3>Q-Learning</h3>
 <p>
+
 In Q-Learning, a computer agent (the green circle in the lab) is trying to
-maximize his reward. The lab offers several rewards, with the most important
+maximize her reward. The lab offers several rewards, with the most important
 being the goal. Like a lab rat, the agent is being enticed to the end of the
 maze. The agent is then reset to the starting point, but with the knowledge
 she gained.
+
 </p><p>
-The x-y position of the agent is her <b>state</b>. The agent can always take
-one of 4 <b>actions</b>: move up, down, left, or right. After each action, the
-computer agent updates her "expected reward", or <b>q-value</b>, for taking
-that action from that state. The next time the agent encounters this state,
-she will probably choose the action with the highest q-value.
-</p>
+
+The x-y position of the agent on the map is her <b>state</b>. The agent can
+always take one of 4 <b>actions</b>: move up, down, left, or right. After each
+action, the computer agent updates her "expected reward", or <b>q-value</b>,
+for taking that action from that state. The next time the agent encounters
+this state, she will probably choose the action with the highest q-value.
+
+</p><p>
+
+The q-value is updated using the following equation.</p>
 <p>
-The q-value is updated using the following equation.<br>
-<img src="q_equation.png">
-</p>
-<p>
-In this lab, the Q(s,a) function is a 3D matrix, where each x-y position has a
-value for each action (matrix size 16 x 12 x 4). After the agent takes an
-action, she observes the <b>reward</b> (or penalty) for taking that action AND
-observes the best q-value of the new state. The q-value of the old state is
-then updated.
-</p><p>
-The <b>learning rate</b>, often denoted by &alpha;, controls how much a
-q-value changes each repetition. With a high learning rate, any changes to the
-environment will cause the agent to be confused less by allowing the q-values
-to change quickly to the new conditions. However, in a changing environment
-where not all the variables in a state are captured, a low learning rate may
-be advantageous by retaining the best action for the most probable conditions
-in that state. For instance, a navigating robot may not track the wind, and
-if the rare wind knocks it over, the robot should not change its actions for
-occasional variables in the state it does not know about.
-</p><p>
-The <b>discount factor</b>, often denoted by &gamma;, controls how much a
-q-value changes according to future rewards, as opposed to immediate rewards.
-A factor of 1 prefers future rewards, whereas a factor of 0 prefers immediate
-rewards. If a far away goal with high reward and a close goal with a low
-reward are on the map, the agent will prefer one of the goals according to
-this factor.
-</p><p>
-The agent occasionally chooses to do a random action, instead of following the
-one with the highest q-value, in order to explore. In papers, this probability
-of exploration is often assigned &epsilon;. Here, it is called <b>exploration
-impulsiveness</b>.
+Q<sub>t+1</sub>(s<sub>t</sub>, a<sub>t</sub>) =
+Q<sub>t</sub>(s<sub>t</sub>, a<sub>t</sub>) + &alpha; * (R<sub>t+1</sub> +
+&gamma; * max<sub>a</sub> [Q<sub>t</sub>(s<sub>t+1</sub>, a)] -
+Q<sub>t</sub>(s<sub>t</sub>, a<sub>t</sub>))
 </p>
 
+<p>Q<sub>t</sub>(s<sub>t</sub>, a<sub>t</sub>) is the q-value of the old state<br>
+Q<sub>t+1</sub>(s<sub>t</sub>, a<sub>t</sub>) is the updated q-value of the old state<br>
+max<sub>a</sub> [Q<sub>t</sub>(s<sub>t+1</sub>, a)] is the best q-value of the new state<br>
+&alpha; is the <b>learning rate</b><br>
+R<sub>t+1</sub> is the observed <b>reward</b> for taking the action<br>
+&gamma; is the <b>discount rate</b><br>
+</p>
 
+<p>In this lab, the Q(s,a) function is a 3D matrix acting as a lookup-table,
+where each x-y position has a value for each action (matrix size 16 x 12 x 4).
+After the agent takes an action, she observes the <b>reward</b> (or penalty)
+for taking that action AND observes the best q-value of the new state. The
+q-value of the old state is then updated.</p>
 
+<p>The <b>reward</b> for reaching a state can be adjusted in the lab by the
+values under each corresponding map tile. This lab has a reward that only
+depends on the state, but in other applications, the reward may be dependent
+also on the action. For instance, you can travel from your location (old
+state) to a foreign country (new state) by flight or by driving, but driving
+is less costly.</p>
+
+<p>The <b>learning rate (&alpha;)</b> controls what the percentage of the
+updated q-value is the new value as opposed to the old value. The effect of
+the learning rate is easier to see if the q-learning equation is algebraically
+rearranged to</p>
+
+<p> Q<sub>t+1</sub>(s<sub>t</sub>, a<sub>t</sub>) = (1 - &alpha;) *
+Q<sub>t</sub>(s<sub>t</sub>, a<sub>t</sub>) + &alpha; *
+(R<sub>t+1</sub> + &gamma; * max<sub>a</sub> [Q<sub>t</sub>(s<sub>t+1</sub>,
+a)]) </p>
+
+<p>With a high learning rate, any changes to the map will cause the agent to
+adapt quickly to the new conditions by allowing the q-values to adjust
+quickly. However, if the state must be estimated (where not all the variables
+in a state are captured), a low learning rate will make the action taken more
+consistent by retaining the best action for the most probable conditions in
+that state. For instance, a navigating robot may not track the wind, and if
+occasional wind knocks it over, the robot should not change its actions for
+occasional variables in the state it does not know about.</p>
+
+<p>The <b>discount factor (&gamma;)</b> is how much a future reward should be
+discounted for each step (or action) that must be done to reach it. It thus
+controls how much a q-value changes according to future rewards, as opposed to
+immediate rewards. A factor of 1 prefers future rewards, whereas a factor of 0
+prefers immediate rewards. If a far away goal with high reward and a close
+goal with a low reward are on the map, the agent will prefer one of the goals
+according to this factor.</p>
+
+<p></p>
+
+<p>The agent occasionally chooses to do a random action, instead of following
+the one with the highest q-value, in order to explore. In papers, this
+probability of exploration is often assigned &epsilon;. Here, it is called
+<b>exploration impulsiveness</b>.</p>
+
+<h3 id="map_tiles_explanation">Map Tiles</h3>
+
+<h4 id="open_tile">Open</h4>
+
+This tile changes from gray to white depending on the q-value of the
+corresponding state. The best action to take is displayed as an arrow pointing
+in the associated direction of movement.
+
+<h4 id="grass_tile">Grass</h4>
+
+This tile changes from green to white depending on the q-value of the
+corresponding state. The best action to take is displayed as an arrow pointing
+in the associated direction of movement.
+
+<h4 id="wall_tile">Wall</h4>
+
+This tile will prevent the agent from entering the state, effectively blocking
+the agent's path. The underlying q-values remain after placing a wall, so
+future removal of that wall will continue to have the old path.
+
+<h4 id="goal_tile">Goal</h4>
+
+A tile that will send the agent back to the starting position to begin again.
+
+<h4 id="cookie_tile">Cookie</h4>
+
+A cookie gives a reward for the first time the state is entered, and is an
+open tile for any subsequent reentering of the state.
+
+<h4 id="water_tile">Water</h4>
+
+The best action to take is displayed as an arrow pointing in the associated
+direction of movement. No color change.
 
 <h3 id="exploration_impulsiveness">Exploration Impulsiveness</h3>
+
+Valid values: 0.0 to 1.0<br>
+0.0 prevents any random exploration.<br>
+1.0 constantly explores, without regard to the best action to take.
+
+<p>Decimal percentage of how probable the agent will take a random action
+rather than the optimal one.</p>
+
 <h3 id="learning_rate">Learning Rate</h3>
+
+Valid values: 0.0 to 1.0<br>
+0.0 prevents any learning of the old state.<br>
+1.0 saves the last state only, causing the agent to rapidly adapt.
+
+<p>Controls how much a new observation affects a q-value.</p>
+
+<p> Generally, values of 0.1 to 0.5 are chosen when the state can only be
+estimated. For the lab, values of 1.0 work because the state is completely
+known.</p>
+
+<p>To see the effect of this variable, experiment with changing the map so the
+path has to change. </p>
+
 <h3 id="discount_rate">Discount Rate</h3>
+
+Valid values: 0.0 to &lt; 1.0<br>
+0.0 makes the agent seek immediate rewards<br>
+0.9999 makes the agent seek larger future rewards<br>
+
+
+<p>Note: 1.0 will break the agent if there is no penalty for each state, as
+all the actions will take on the value of the future reward and the agent will
+not be able to discern what the best action is to take for a given state. From
+an psychology perspective, this is like knowing that you will receive a reward
+no matter what you do.</p>
+
+<p>The discount rate controls how much a closer reward is valued over a
+distant reward.</p>
+
 <h3 id="memory">Memory</h3>
+
+<p>Basic q-learning can take a long time to find the best path because the
+q-values must be propogated from the goal back to the start position, and this
+propogation depends on the random exploration.</p>
+
+<p>Memory is a personal experiment on q-learning to resolve this issue. When
+an end state is reached, the agent remembers some of the steps she took to get
+to that state by backpropogating the q-values. Since this memory may not be
+the optimal path, the backpropogation q-values are reduced by a percentage in
+order to allow the basic q-learning to appropriately learn the optimal path by
+random exploration from these states. If the backpropogated value is less than
+the current q-value, the value is not updated.</p>
+
+<p>Since the memory backpropogation occurs when the goal state is reached, it
+can only help for however much memory is supplied. A better implementation
+would apply backpropogation every step taken, to accelerate learning the
+entire path.</p>
+
 <h4>Memory Size</h4>
+
+Valid values: 0 to 500 (integers)<br>
+0 turns off the memory<br>
+500 gives the agent a memory that stores 500 actions
+
 <h4>Memory Discount</h4>
+
+Valid values: 0.0 to 1.0<br>
+0.0 also turns off memory<br>
+1.0 gives the memory the same level as the basic q-learning algorithm<br>
+
+<p>Note: the best value is about 0.2 to give the basic q-learning algorithm
+space to find the optimal path.</p>
+
+
 <h3 id="stochastic">Stochastic Update Memory</h3>
 
+<p>Instead of updating the q-value for the current action, stochastic memory
+is used to randomly select a past q-value to update. This method is slower to
+initially find a path to the goal, but can find the best path from ALL spaces
+much more quickly.</p>
+
+Valid values: 0 to 500<br>
+0 turns off the memory updates<br>
+500 gives the agent plenty of past memory to draw transistions from
+
+
+<h2>Questions to Investigate</h2>
+
+<ol>
+
+<li>What does the agent do when the map changes? If you add a wall for one
+game, and remove it for the next?</li>
+
+<li>What is the effect of changing the open space rewards to -10, simulating
+the expenditure of resources to get to the goal?</li>
+
+<li>Does adding water in the middle of the path cause the agent to avoid
+it?</li>
+
+<li>Which goal does an agent choose if there are 2 or more? What if one has
+less reward (by adding water or grass)? Does the discount rate have anything
+to do with the selection?</li>
+
+</ol>
+
+<h2>Software Challenges</h2>
+<ol>
+
+<li>Change memory to backpropogate every step. Does the agent still find the
+optimal path?</li>
+
+<li>Diminish the reward of getting to a goal every game, then add multiple
+goals. How does the agent behave?</li>
+
+<li>Add learning rate annealing, where the learning rate slowly diminishes
+each game. At what annealing rates does the agent effectively find the best
+path?</li>
+
+</ol>
 
 </div>
 
