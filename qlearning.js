@@ -650,7 +650,7 @@ var QLearn = function(html_elements)
                         }
                     }
 
-                    color_value = (max_q + 150) | 0;
+                    color_value = ((max_q / this.rewards[this.GOAL]) * 100 + 150) | 0;
 
                     this.displayContext.fillStyle = "rgb(" + color_value + "," + color_value + "," + color_value + ")";
                     this.displayContext.fillRect(idx * 32,
@@ -675,7 +675,7 @@ var QLearn = function(html_elements)
                         }
                     }
 
-                    color_value = (max_q + 150) | 0;
+                    color_value = ((max_q / this.rewards[this.GOAL]) * 100 + 150) | 0;
 
                     this.displayContext.fillStyle = "rgb(" + color_value + ",255," + color_value + ")";
                     this.displayContext.fillRect(idx * 32,
@@ -765,6 +765,8 @@ function loadImage(src, cb)
 
 
 /*
+ * TODO: Parameters get slider bars
+ * TODO: Indicate and change starting location
  * TODO: Diminishing returns
  * TODO: Learning rate annealing
  */
