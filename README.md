@@ -16,4 +16,5 @@ The grid can be edited by the mouse by clicking, and different elements can
 be introduced by clicking on the colored squares below the grid canvas.
 
 ## Running
-Open index.html in a browser. Tested largely in Firefox and Chrome.
+Either download this repository and open index.html in a browser, or visit
+https://drewgarrido.github.io/qlearn. Tested largely in Firefox and Chrome.
